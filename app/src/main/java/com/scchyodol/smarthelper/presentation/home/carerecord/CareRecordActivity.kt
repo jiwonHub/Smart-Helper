@@ -1,5 +1,6 @@
 package com.scchyodol.smarthelper.presentation.home.carerecord
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.res.ColorStateList
@@ -211,7 +212,6 @@ class CareRecordActivity : AppCompatActivity() {
             val memo     = binding.etMemo.text.toString().trim()
             val isRepeat = binding.switchRepeat.isChecked
 
-            // 수치 검증
             if (value.isEmpty() && currentCategory != CATEGORY_OTHER) {
                 binding.etValue.error = "수치를 입력해주세요"
                 binding.etValue.requestFocus()
@@ -219,7 +219,6 @@ class CareRecordActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 반복 ON인데 요일 미선택 시 경고
             if (isRepeat && selectedDays.isEmpty()) {
                 Toast.makeText(this, "반복할 요일을 하나 이상 선택해주세요", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -227,15 +226,22 @@ class CareRecordActivity : AppCompatActivity() {
 
             val timestamp = calendar.timeInMillis
 
-            Log.d(TAG, "저장 - timestamp: $timestamp, category: $currentCategory, " +
-                    "isRepeat: $isRepeat, repeatDays: ${selectedDays.sorted()}")
-
-            viewModel.saveRecord(
-                timestamp  = timestamp,
-                category   = currentCategory,
-                value      = value,
-                memo       = memo,
-            )
+            if (isRepeat) {
+                viewModel.saveRepeatRecord(
+                    baseTimestamp  = timestamp,
+                    category       = currentCategory,
+                    value          = value,
+                    memo           = memo,
+                    repeatDaysList = selectedDays.sorted()
+                )
+            } else {
+                viewModel.saveRecord(
+                    timestamp = timestamp,
+                    category  = currentCategory,
+                    value     = value,
+                    memo      = memo
+                )
+            }
         }
     }
 

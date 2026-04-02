@@ -48,13 +48,6 @@ interface CareRecordDao {
     @Query("SELECT * FROM care_records WHERE category = :category ORDER BY timestamp DESC")
     fun getByCategory(category: String): Flow<List<CareRecord>>
 
-    @Query("""
-        SELECT * FROM care_records
-        WHERE isRepeat = 1
-        ORDER BY timestamp ASC
-    """)
-    fun getRepeatRecords(): Flow<List<CareRecord>>
-
     // 단일 날짜 기준 범위 조회 (timestamp 범위)
     @Query("""
         SELECT * FROM care_records
@@ -75,13 +68,18 @@ interface CareRecordDao {
     fun getValueHistoryByCategory(category: CareCategory): Flow<List<String>>
 
     // 특정 월의 기록 전체 조회 (timestamp 범위로)
-    @Query("""
-    SELECT * FROM care_records 
-    WHERE timestamp >= :startOfMonth AND timestamp < :endOfMonth
-    ORDER BY timestamp ASC
-    """)
+    @Query("SELECT * FROM care_records WHERE timestamp >= :startOfMonth AND timestamp < :endOfMonth AND isRepeat = 0")
     fun getRecordsByMonth(startOfMonth: Long, endOfMonth: Long): Flow<List<CareRecord>>
 
     @Query("SELECT * FROM care_records WHERE isRepeat = 1")
     suspend fun getAllRepeatRecords(): List<CareRecord>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(records: List<CareRecord>)
+
+    @Query("SELECT * FROM care_records WHERE isRepeat = 1")
+    fun getRepeatRecords(): Flow<List<CareRecord>>
+
+    @Query("SELECT * FROM care_records WHERE isRepeat = 1")
+    suspend fun getRepeatRecordsOnce(): List<CareRecord>
 }

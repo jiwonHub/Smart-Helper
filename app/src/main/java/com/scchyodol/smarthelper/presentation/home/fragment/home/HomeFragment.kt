@@ -78,8 +78,10 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.nextTask.collect { record ->
                     if (record != null) {
-                        val timeStr     = SimpleDateFormat("a hh:mm", Locale.KOREA).format(Date(record.timestamp))
                         val categoryStr = getCategoryLabel(record.category)
+
+                        val timeStr = SimpleDateFormat("M월 d일 a hh:mm", Locale.KOREA).format(Date(record.timestamp))
+
                         tvNextTaskLabel.text = "$timeStr · $categoryStr"
                         Log.d(TAG, "다음 할 일: $timeStr / $categoryStr")
                     } else {

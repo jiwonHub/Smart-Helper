@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF8F0"
+    tools:context=".presentation.home.main.MainActivity">
+
+    <!-- ✅ 탑바 -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        app:liftOnScroll="false">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="#FFFFFF"
+            app:contentInsetStart="16dp"
+            app:contentInsetEnd="0dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/main_icon"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/smart_helper_ic"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="스마트 헬퍼"
+                    android:textColor="#FF9800"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toEndOf="@id/main_icon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/subTitle"
+                    android:layout_marginStart="10dp"/>
+
+                <TextView
+                    android:id="@+id/subTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="재택 안하의료 돌봄 지원"
+                    android:textSize="10sp"
+                    android:textColor="#333333"
+                    android:alpha="0.5"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/title"
+                    app:layout_constraintStart_toStartOf="@id/title"/>
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- 앱 타이틀 (좌측) -->
+
+            <!-- 우측 아이콘 영역 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingEnd="12dp">
+
+                <!-- 프로필 사진 -->
+                <ImageView
+                    android:id="@+id/ivProfilePhoto"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/user"
+                    android:scaleType="centerCrop"
+                    android:background="@drawable/circle_profile_bg"
+                    android:contentDescription="프로필"
+                    android:clipToOutline="true" />
+
+                <!-- 설정 아이콘 -->
+                <ImageView
+                    android:id="@+id/ivSettings"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:padding="6dp"
+                    android:src="@drawable/setting"
+                    android:contentDescription="설정"
+                    android:background="?attr/selectableItemBackgroundBorderless" />
+
+            </LinearLayout>
+
+        </androidx.appcompat.widget.Toolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ✅ 프래그먼트 컨테이너 -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:paddingBottom="0dp" />
+
+    <!-- ✅ 바텀 네비게이션 -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FFFFFF"
+        app:itemIconTint="@drawable/bottom_nav_selector"
+        app:itemTextColor="@drawable/bottom_nav_selector"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

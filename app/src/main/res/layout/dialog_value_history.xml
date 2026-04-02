@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_rounded"
+    android:padding="24dp">
+
+    <!-- 타이틀 -->
+    <TextView
+        android:id="@+id/tvDialogTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="기록 조회"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#1A1A2E"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnDialogClose"/>
+
+    <!-- 닫기 버튼 -->
+    <ImageView
+        android:id="@+id/btnDialogClose"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:padding="4dp"
+        android:alpha="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/tvDialogTitle"
+        app:layout_constraintBottom_toBottomOf="@id/tvDialogTitle"/>
+
+    <!-- 구분선 -->
+    <View
+        android:id="@+id/dividerTitle"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#F0F0F0"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvDialogTitle"/>
+
+    <!-- 헤더 행: 수치 기록 | 기본 값 설정 -->
+    <TextView
+        android:id="@+id/tvHeaderValue"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="수치 기록"
+        android:textSize="13sp"
+        android:textColor="#888888"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:layout_marginTop="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerTitle"
+        app:layout_constraintEnd_toStartOf="@id/tvHeaderDefault"/>
+
+    <TextView
+        android:id="@+id/tvHeaderDefault"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="기본 값 설정"
+        android:textSize="13sp"
+        android:textColor="#888888"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:letterSpacing="0.05"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerTitle"/>
+
+    <!-- 구분선 2 -->
+    <View
+        android:id="@+id/dividerHeader"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#F0F0F0"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHeaderValue"/>
+
+    <!-- 리사이클러뷰 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvValueHistory"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxHeight="300dp"
+        android:nestedScrollingEnabled="true"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerHeader"/>
+
+    <!-- 구분선 3 -->
+    <View
+        android:id="@+id/dividerBottom"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#F0F0F0"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rvValueHistory"/>
+
+    <!-- 확인 버튼 -->
+    <Button
+        android:id="@+id/btnConfirm"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:text="확인"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#4A90D9"
+        android:stateListAnimator="@null"
+        android:layout_marginTop="12dp"
+        app:cornerRadius="14dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerBottom"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

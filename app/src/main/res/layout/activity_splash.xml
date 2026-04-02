@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF8F4EE">
+
+    <ImageView
+        android:layout_width="380dp"
+        android:layout_height="380dp"
+        android:src="@drawable/blob_orange"
+        android:alpha="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="-80dp"
+        android:layout_marginTop="-80dp" />
+
+    <ImageView
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        android:src="@drawable/blob_blue"
+        android:alpha="0.65"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginEnd="-60dp"
+        android:layout_marginBottom="-60dp" />
+
+    <ImageView
+        android:layout_width="280dp"
+        android:layout_height="280dp"
+        android:src="@drawable/blob_pink"
+        android:alpha="0.70"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="-40dp" />
+
+    <ImageView
+        android:id="@+id/iv_app_icon"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@mipmap/ic_launcher"
+        android:background="@drawable/icon_bg_rounded"
+        android:padding="12dp"
+        android:elevation="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tv_app_name"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 앱 이름 -->
+    <TextView
+        android:id="@+id/tv_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="스마트 헬퍼"
+        android:textSize="28sp"
+        android:textColor="#2D2D2D"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <!-- 서브타이틀 -->
+    <TextView
+        android:id="@+id/tv_subtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="재택 의료 돌봄 지원 서비스"
+        android:textSize="13sp"
+        android:textColor="#888888"
+        android:layout_marginTop="6dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_app_name" />
+
+    <!-- 진행 바 -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="160dp"
+        android:layout_height="4dp"
+        android:progressDrawable="@drawable/progress_bar_drawable"
+        android:max="100"
+        android:progress="0"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_subtitle" />
+
+    <!-- 로딩 텍스트 -->
+    <TextView
+        android:id="@+id/tv_loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="시스템을 불러오는 중입니다..."
+        android:textSize="11sp"
+        android:textColor="#AAAAAA"
+        android:layout_marginTop="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progress_bar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

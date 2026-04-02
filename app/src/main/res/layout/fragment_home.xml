@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EAF4FB"
+    android:padding="20dp">
+
+    <!-- 좌/우 분할 가이드라인 (60% 지점) -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineVertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.70"/>
+
+    <!-- ✅ 좌측: 다음 할 일 그라디언트 카드 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardNextTask"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginEnd="18dp"
+        android:layout_marginBottom="100dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineVertical"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradient_blue_green_bg">
+
+            <!-- 다음 할 일 타이틀 -->
+            <TextView
+                android:id="@+id/tvNextTaskTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="다음 할 일"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="40dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/tvMenuDot"/>
+
+            <!-- ⋮ 버튼 -->
+            <TextView
+                android:id="@+id/tvMenuDot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⋮"
+                android:textSize="30sp"
+                android:textColor="#FFFFFFBB"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="32dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
+
+            <!-- ✅ 흰색 테두리 컨테이너 (서브타이틀 + 카운트다운 감싸기) -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/containerTaskInfo"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="40dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginTop="70dp"
+                android:layout_marginBottom="40dp"
+                android:padding="14dp"
+                android:background="@drawable/white_border_rounded_bg"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvNextTaskTitle">
+
+                <!-- 투약 예정 서브타이틀 -->
+                <TextView
+                    android:id="@+id/tvNextTaskLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="오후 2:00 투약 예정 – 항경련제"
+                    android:textColor="@color/black"
+                    android:textSize="32sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/tvCountdown"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed"/>
+
+                <!-- 카운트다운 -->
+                <TextView
+                    android:id="@+id/tvCountdown"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1시간 30분 남음"
+                    android:textColor="@color/black"
+                    android:textSize="64sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="32dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvNextTaskLabel"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 우측 상단: 환경 정보 카드 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardWeather"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="10dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:cardMaxElevation="6dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintStart_toEndOf="@id/guidelineVertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/cardNextTask"
+        app:layout_constraintBottom_toTopOf="@id/cardGuardianMessage"
+        app:layout_constraintVertical_chainStyle="spread">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="14dp">
+
+            <TextView
+                android:id="@+id/tvWeatherLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="환경 정보"
+                android:textSize="24sp"
+                android:layout_marginStart="10dp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvWeatherSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="24°C"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A2E"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintStart_toStartOf="@id/tvWeatherLabel"
+                app:layout_constraintTop_toBottomOf="@id/tvWeatherLabel"/>
+
+            <TextView
+                android:id="@+id/tvHumiditySummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50%"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:textColor="#1A1A2E"
+                android:layout_marginTop="6dp"
+                android:layout_marginStart="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/tvWeatherSummary"
+                app:layout_constraintTop_toBottomOf="@id/tvWeatherLabel"
+                app:layout_constraintBaseline_toBaselineOf="@id/tvWeatherSummary"/>
+
+            <TextView
+                android:id="@+id/tvTempIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🌡"
+                android:textSize="25sp"
+                android:layout_marginTop="6dp"
+                app:layout_constraintEnd_toStartOf="@id/tvTempText"
+                app:layout_constraintTop_toBottomOf="@id/tvWeatherSummary"/>
+
+            <TextView
+                android:id="@+id/tvTempText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="온도"
+                android:textSize="25sp"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@id/tvWeatherSummary"
+                app:layout_constraintEnd_toEndOf="@id/tvWeatherSummary"
+                app:layout_constraintBaseline_toBaselineOf="@id/tvTempIcon"/>
+
+            <TextView
+                android:id="@+id/tvHumidIcon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="💧"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toStartOf="@+id/tvHumidText"
+                app:layout_constraintBaseline_toBaselineOf="@id/tvTempIcon"/>
+
+            <TextView
+                android:id="@+id/tvHumidText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="습도"
+                android:textSize="25sp"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="@id/tvHumiditySummary"
+                app:layout_constraintEnd_toEndOf="@+id/tvHumiditySummary"
+                app:layout_constraintBaseline_toBaselineOf="@id/tvHumidIcon"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 우측 하단: 보호자 격려 메시지 카드 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardGuardianMessage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="10dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        app:cardMaxElevation="6dp"
+        app:cardBackgroundColor="#FFFFFF"
+        app:layout_constraintStart_toEndOf="@id/guidelineVertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardWeather"
+        app:layout_constraintBottom_toBottomOf="@id/cardNextTask">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="30dp">
+
+            <TextView
+                android:id="@+id/tvGuardianLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="보호자 격려 메시지"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <TextView
+                android:id="@+id/tvGuardianMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="오늘도 참 잘하고 계세요!&#10;따뜻한 차 한잔 어떠세요?"
+                android:textSize="20sp"
+                android:textColor="@color/black"
+                android:lineSpacingMultiplier="1.5"
+                android:layout_marginTop="12dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvGuardianLabel"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

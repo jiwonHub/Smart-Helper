@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="#FFF8F4EE">
+
+    <!-- ═══════════════════════════════ -->
+    <!--   왼쪽 오렌지 패널               -->
+    <!-- ═══════════════════════════════ -->
+    <FrameLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="@drawable/bg_left_panel"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <!-- 블롭 1: 왼쪽 상단 큰 원 -->
+        <ImageView
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:src="@drawable/blob_orange_large"
+            android:alpha="0.4"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="-60dp"
+            android:layout_marginTop="-60dp" />
+
+        <!-- 블롭 2: 오른쪽 중단 원 -->
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/blob_orange_large"
+            android:alpha="0.3"
+            android:layout_gravity="top|end"
+            android:layout_marginEnd="-40dp"
+            android:layout_marginTop="80dp" />
+
+        <!-- 블롭 3: 하단 핑크 원 -->
+        <ImageView
+            android:layout_width="240dp"
+            android:layout_height="240dp"
+            android:src="@drawable/blob_peach"
+            android:alpha="0.5"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="-40dp" />
+
+        <!-- 중앙 콘텐츠 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp">
+
+            <!-- 앱 아이콘 카드 -->
+            <FrameLayout
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:background="@drawable/bg_icon_card"
+                android:elevation="4dp">
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/smart_helper_ic"
+       />
+            </FrameLayout>
+
+            <!-- 앱 이름 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="스마트 헬퍼"
+                android:textSize="30sp"
+                android:textColor="#FFFFFFFF"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp" />
+
+            <!-- 앱 설명 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="재택 의료 돌봄을 위한\n스마트한 지원 서비스"
+                android:textSize="13sp"
+                android:textColor="#E6FFFFFF"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.5"
+                android:layout_marginTop="8dp" />
+
+            <!-- 칩 행 1 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="24dp"
+                android:gravity="center">
+
+                <!-- 돌봄 기록 칩 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🩺 돌봄 기록"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFFFF"
+                    android:background="@drawable/bg_chip"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="7dp" />
+
+                <!-- 교육 자료 칩 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📚 교육 자료"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFFFF"
+                    android:background="@drawable/bg_chip"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginStart="8dp" />
+
+                <!-- 사랑의 메시지 칩 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💙 사랑의 메시지"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFFFF"
+                    android:background="@drawable/bg_chip"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="7dp"
+                    android:layout_marginStart="8dp" />
+            </LinearLayout>
+
+            <!-- 칩 행 2 -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center">
+
+                <!-- 자기돌봄 칩 -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🌿 자기돌봄"
+                    android:textSize="12sp"
+                    android:textColor="#FFFFFFFF"
+                    android:background="@drawable/bg_chip"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="7dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- ═══════════════════════════════ -->
+    <!--   오른쪽 로그인 패널             -->
+    <!-- ═══════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#FFF8F4EE"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="48dp">
+
+        <!-- 로그인 타이틀 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="로그인"
+            android:textSize="28sp"
+            android:textColor="#1A1A1A"
+            android:textStyle="bold" />
+
+        <!-- 서브 타이틀 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Google 계정으로 간편하게 시작하세요"
+            android:textSize="13sp"
+            android:textColor="#888888"
+            android:layout_marginTop="8dp" />
+
+        <!-- 구글 로그인 버튼 -->
+        <LinearLayout
+            android:id="@+id/btn_google_login"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_google_button"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="32dp"
+            android:elevation="2dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <!-- 구글 로고 이미지 (직접 추가) -->
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:src="@drawable/google" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Google 계정으로 로그인"
+                android:textSize="15sp"
+                android:textColor="#1A1A1A"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</LinearLayout>

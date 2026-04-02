@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF8F0"
+    android:clipToPadding="false"
+    android:paddingBottom="72dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- ✅ 상단 배너 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#F06292">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/love_banner_bg"
+                android:padding="20dp"
+                android:paddingTop="22dp"
+                android:paddingBottom="22dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="6dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💌"
+                        android:textSize="18sp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="사랑의 메시지"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#FFFFFF"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="보호자의 목소리로 아이에게 사랑을 전해보세요"
+                    android:textSize="13sp"
+                    android:textColor="#FFE0EC"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ✅ 녹음 컨테이너 -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:padding="32dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="버튼을 눌러 메시지를 녹음하세요"
+                    android:textSize="14sp"
+                    android:textColor="#AAAAAA"
+                    android:layout_marginBottom="24dp"/>
+
+                <!-- 마이크 버튼 -->
+                <FrameLayout
+                    android:id="@+id/btnRecord"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@drawable/btn_mic_bg"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/mic"
+                        android:scaleType="centerInside"
+                        app:tint="#FFFFFF" />
+                </FrameLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="최대 3분까지 녹음 가능"
+                    android:textSize="12sp"
+                    android:textColor="#CCCCCC"/>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ✅ 저장된 메시지 타이틀 -->
+        <TextView
+            android:id="@+id/tvSavedTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="저장된 메시지 (1개)"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="10dp"
+            android:layout_marginStart="4dp"/>
+
+        <!-- ✅ 저장된 메시지 리스트 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvMessages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"/>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

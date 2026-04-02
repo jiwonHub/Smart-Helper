@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "756463766345",
+    "project_id": "smart-helper-1a597",
+    "storage_bucket": "smart-helper-1a597.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:756463766345:android:b303ef5167aa8a3d182898",
+        "android_client_info": {
+          "package_name": "com.scchyodol.smarthelper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "756463766345-coripo3avdu816tb4m6cnpjne0aeijp2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.scchyodol.smarthelper",
+            "certificate_hash": "dd4a92cf7b23548f4300eb0f4081ff84f99e55f6"
+          }
+        },
+        {
+          "client_id": "756463766345-ks3pmqvjhumcei878jm2iinptkvrque9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCy2GTL3spryeZwknck7z8J4rnHGNAgM-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "756463766345-ks3pmqvjhumcei878jm2iinptkvrque9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

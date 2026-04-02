@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dp">
+
+    <!-- 가로 중간 가이드라인 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineHCenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.5"/>
+
+    <!-- 세로 중간 가이드라인 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineV1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.33"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineV2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.67"/>
+
+    <!-- ✅ 1. 투약 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnMedication"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#4A90D9"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineV1"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iconMedication"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/pills"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvMedicationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="투약"
+                android:textColor="#FFFFFF"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconMedication"
+                app:layout_constraintTop_toTopOf="@id/iconMedication"
+                app:layout_constraintBottom_toTopOf="@+id/tvMedicationSub"/>
+
+            <TextView
+                android:id="@+id/tvMedicationSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Medication)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="28sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconMedication"
+                app:layout_constraintBottom_toBottomOf="@id/iconMedication"
+                app:layout_constraintTop_toBottomOf="@+id/tvMedicationTitle"
+                app:layout_constraintVertical_chainStyle="packed"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 2. 수면 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnSleep"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#7B52D3"
+        app:layout_constraintStart_toEndOf="@id/guidelineV1"
+        app:layout_constraintEnd_toStartOf="@id/btnSiksa"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iconSleep"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/bed"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvSleepTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수면"
+                android:textColor="#FFFFFF"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconSleep"
+                app:layout_constraintBottom_toTopOf="@+id/tvSleepSub"
+                app:layout_constraintTop_toTopOf="@id/iconSleep"/>
+
+            <TextView
+                android:id="@+id/tvSleepSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Sleep)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="28sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintTop_toBottomOf="@id/tvSleepTitle"
+                app:layout_constraintStart_toEndOf="@id/iconSleep"
+                app:layout_constraintBottom_toBottomOf="@id/iconSleep"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 3. 식사 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnSiksa"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#F5A623"
+        app:layout_constraintStart_toEndOf="@id/btnSleep"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iconSiksa"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/rice"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvSiksaTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="식사"
+                android:textColor="#FFFFFF"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconSiksa"
+                app:layout_constraintBottom_toTopOf="@+id/tvSiksaSub"
+                app:layout_constraintTop_toTopOf="@id/iconSiksa"/>
+
+            <TextView
+                android:id="@+id/tvSiksaSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Meal)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="28sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconSiksa"
+                app:layout_constraintTop_toBottomOf="@id/tvSiksaTitle"
+                app:layout_constraintBottom_toBottomOf="@id/iconSiksa"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 4. 배변 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnExcretion"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#4CAF82"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/guidelineV1"
+        app:layout_constraintTop_toBottomOf="@id/btnMedication">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iconExcretion"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/diaper"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvExcretionTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="배변"
+                android:textColor="#FFFFFF"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconExcretion"
+                app:layout_constraintBottom_toTopOf="@+id/tvExcretionSub"
+                app:layout_constraintTop_toTopOf="@id/iconExcretion"/>
+
+            <TextView
+                android:id="@+id/tvExcretionSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Excretion)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="28sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconExcretion"
+                app:layout_constraintTop_toBottomOf="@id/tvExcretionTitle"
+                app:layout_constraintBottom_toBottomOf="@id/iconExcretion"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 5. 체온/SpO2 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnVitals"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#E84C4C"
+        app:layout_constraintStart_toEndOf="@id/guidelineV1"
+        app:layout_constraintEnd_toStartOf="@id/btnOther"
+        app:layout_constraintTop_toBottomOf="@id/btnSleep">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iconVitals"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/thermometer"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvVitalsTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="체온/SpO2"
+                android:textColor="#FFFFFF"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconVitals"
+                app:layout_constraintBottom_toTopOf="@+id/tvVitalsSub"
+                app:layout_constraintTop_toTopOf="@id/iconVitals"/>
+
+            <TextView
+                android:id="@+id/tvVitalsSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Vitals)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="28sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconVitals"
+                app:layout_constraintTop_toBottomOf="@+id/tvVitalsTitle"
+                app:layout_constraintBottom_toBottomOf="@id/iconVitals"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- ✅ 6. 기타 -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/btnOther"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:layout_margin="20dp"
+        android:foreground="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#26A69A"
+        app:layout_constraintStart_toEndOf="@id/btnVitals"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnSiksa">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="12dp">
+
+            <ImageView
+                android:id="@+id/iconOther"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/document"
+                android:layout_marginStart="20dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tint="#FFFFFF" />
+
+            <TextView
+                android:id="@+id/tvOtherTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="기타"
+                android:textColor="#FFFFFF"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconOther"
+                app:layout_constraintBottom_toTopOf="@+id/tvOtherSub"
+                app:layout_constraintTop_toTopOf="@id/iconOther"/>
+
+            <TextView
+                android:id="@+id/tvOtherSub"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(Other)"
+                android:textColor="#CCFFFFFF"
+                android:textSize="28sp"
+                android:layout_marginStart="10dp"
+                app:layout_constraintStart_toEndOf="@id/iconOther"
+                app:layout_constraintTop_toBottomOf="@id/tvOtherTitle"
+                app:layout_constraintBottom_toBottomOf="@id/iconOther"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF5E6"
+    android:fillViewport="true">
+
+          <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- ════════════════════════════════════════ -->
+        <!--  왼쪽 카드: 오늘의 마음 날씨               -->
+        <!-- ════════════════════════════════════════ -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cardMood"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:layout_margin="40dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/cardStamp">
+
+            <TextView
+                android:id="@+id/tvMoodTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오늘의 마음 날씨"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:textColor="#3D2C1E"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+
+            <!-- ── 행복 ── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/moodHappy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFDF7"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/moodNormal"
+                app:layout_constraintTop_toBottomOf="@id/tvMoodTitle">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="110dp"
+                    android:layout_height="170dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/emojiHappy"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:text="😊"
+                        android:textSize="50sp"
+                        android:gravity="center"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvMoodHappy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="행복"
+                        android:textSize="24sp"
+                        android:textColor="#888888"
+                        android:layout_marginTop="6dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/emojiHappy"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── 평온 ── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/moodNormal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFDF7"
+                app:layout_constraintStart_toEndOf="@id/moodHappy"
+                app:layout_constraintEnd_toStartOf="@id/moodTired"
+                app:layout_constraintTop_toBottomOf="@id/tvMoodTitle">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="110dp"
+                    android:layout_height="170dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/emojiNormal"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:text="😌"
+                        android:textSize="50sp"
+                        android:gravity="center"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvMoodNormal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="평온"
+                        android:textSize="24sp"
+                        android:textColor="#888888"
+                        android:layout_marginTop="6dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/emojiNormal"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── 지침 ── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/moodTired"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFDF7"
+                app:layout_constraintStart_toEndOf="@id/moodNormal"
+                app:layout_constraintEnd_toStartOf="@id/moodSad"
+                app:layout_constraintTop_toBottomOf="@id/tvMoodTitle">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="110dp"
+                    android:layout_height="170dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/emojiTired"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:text="😩"
+                        android:textSize="50sp"
+                        android:gravity="center"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvMoodTired"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="지침"
+                        android:textSize="24sp"
+                        android:textColor="#888888"
+                        android:layout_marginTop="6dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/emojiTired"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+            <!-- ── 슬픔 ── -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/moodSad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginStart="16dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackgroundBorderless"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#FFFDF7"
+                app:layout_constraintStart_toEndOf="@id/moodTired"
+                app:layout_constraintTop_toBottomOf="@id/tvMoodTitle">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="110dp"
+                    android:layout_height="170dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp">
+
+                    <TextView
+                        android:id="@+id/emojiSad"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        android:text="😢"
+                        android:textSize="50sp"
+                        android:gravity="center"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"/>
+
+                    <TextView
+                        android:id="@+id/tvMoodSad"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="슬픔"
+                        android:textSize="24sp"
+                        android:textColor="#888888"
+                        android:layout_marginTop="6dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/emojiSad"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.cardview.widget.CardView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+      <!-- 타이틀 -->
+      <TextView
+          android:id="@+id/tvStampTitle"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:text="나의 돌봄 스탬프"
+          android:textSize="24sp"
+          android:textStyle="bold"
+          android:textColor="#3D2C1E"
+          android:layout_marginTop="10dp"
+          app:layout_constraintTop_toTopOf="@+id/cardMood"
+          app:layout_constraintStart_toStartOf="@id/cardStamp" />
+
+
+        <!-- ════════════════════════════════════════ -->
+        <!--  오른쪽 카드: 나의 돌봄 스탬프 캘린더      -->
+        <!-- ════════════════════════════════════════ -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardStamp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFDF7"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvStampTitle"
+            app:layout_constraintWidth_percent="0.50">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp">
+
+                <!-- 이전 버튼 -->
+                <ImageView
+                    android:id="@+id/btnStampPrev"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/left_arrow"
+                    android:padding="2dp"
+                    app:tint="#B0998A"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tvStampMonth"
+                    app:layout_constraintTop_toTopOf="@id/btnStampNext"
+                    app:layout_constraintBottom_toBottomOf="@id/btnStampNext"/>
+
+                <!-- 월 텍스트 -->
+                <TextView
+                    android:id="@+id/tvStampMonth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3월"
+                    android:textSize="24sp"
+                    android:textColor="#7A6655"
+                    android:layout_marginStart="3dp"
+                    android:layout_marginEnd="3dp"
+                    android:layout_marginBottom="5dp"
+                    app:layout_constraintStart_toEndOf="@id/btnStampPrev"
+                    app:layout_constraintEnd_toStartOf="@id/btnStampNext"
+                    app:layout_constraintBottom_toBottomOf="@+id/btnStampNext"
+                    app:layout_constraintTop_toTopOf="@id/btnStampNext"/>
+
+                <!-- 다음 버튼 -->
+                <ImageView
+                    android:id="@+id/btnStampNext"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:src="@drawable/right_arrow"
+                    android:padding="2dp"
+                    app:tint="#B0998A"
+                    app:layout_constraintStart_toEndOf="@id/tvStampMonth"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"/>
+
+                <!-- 요일 헤더 행 -->
+                <TextView android:id="@+id/tvDow0"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="일"
+                    android:textSize="12sp" android:textColor="#FF7043"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/tvDow1"/>
+                <TextView android:id="@+id/tvDow1"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="월"
+                    android:textSize="12sp" android:textColor="#7A6655"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toEndOf="@id/tvDow0"
+                    app:layout_constraintEnd_toStartOf="@id/tvDow2"/>
+                <TextView android:id="@+id/tvDow2"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="화"
+                    android:textSize="12sp" android:textColor="#7A6655"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toEndOf="@id/tvDow1"
+                    app:layout_constraintEnd_toStartOf="@id/tvDow3"/>
+                <TextView android:id="@+id/tvDow3"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="수"
+                    android:textSize="12sp" android:textColor="#7A6655"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toEndOf="@id/tvDow2"
+                    app:layout_constraintEnd_toStartOf="@id/tvDow4"/>
+                <TextView android:id="@+id/tvDow4"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="목"
+                    android:textSize="12sp" android:textColor="#7A6655"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toEndOf="@id/tvDow3"
+                    app:layout_constraintEnd_toStartOf="@id/tvDow5"/>
+                <TextView android:id="@+id/tvDow5"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="금"
+                    android:textSize="12sp" android:textColor="#7A6655"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toEndOf="@id/tvDow4"
+                    app:layout_constraintEnd_toStartOf="@id/tvDow6"/>
+                <TextView android:id="@+id/tvDow6"
+                    android:layout_width="0dp" android:layout_height="22dp"
+                    android:gravity="center" android:text="토"
+                    android:textSize="12sp" android:textColor="#5C85D6"
+                    android:layout_marginTop="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/btnStampNext"
+                    app:layout_constraintStart_toEndOf="@id/tvDow5"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <!-- 구분선 -->
+                <View
+                    android:id="@+id/dividerDow"
+                    android:layout_width="0dp"
+                    android:layout_height="0.6dp"
+                    android:background="#1A000000"
+                    android:layout_marginBottom="2dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvDow0"/>
+
+                <!-- RecyclerView: 캘린더 그리드 -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvStampCalendar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:overScrollMode="never"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/dividerDow"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- ════════════════════════════════════════ -->
+        <!--  잠시 쉬어가세요                           -->
+        <!-- ════════════════════════════════════════ -->
+        <TextView
+            android:id="@+id/tvRestTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="잠시 쉬어가세요"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#3D2C1E"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="40dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardMood"/>
+
+        <!-- 호흡 가이드 카드 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardBreath"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFDF7"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/cardStretch"
+            app:layout_constraintTop_toBottomOf="@id/tvRestTitle">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="230dp"
+                android:layout_height="190dp">
+
+                <ImageView
+                    android:id="@+id/ivBreath"
+                    android:layout_width="0dp"
+                    android:layout_height="130dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/book"
+                    android:adjustViewBounds="true"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tvBreathTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3분 깊은 호흡 가이드"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="#3D2C1E"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginStart="10dp"
+                    app:layout_constraintTop_toBottomOf="@id/ivBreath"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="바로 시작하기 →"
+                    android:textSize="9sp"
+                    android:textColor="#B0998A"
+                    android:layout_margin="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- 스트레칭 가이드 카드 -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardStretch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="#FFFDF7"
+            app:layout_constraintStart_toEndOf="@id/cardBreath"
+            app:layout_constraintEnd_toStartOf="@id/cardStamp"
+            app:layout_constraintTop_toBottomOf="@id/tvRestTitle">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="230dp"
+                android:layout_height="190dp">
+
+                <ImageView
+                    android:id="@+id/ivStretch"
+                    android:layout_width="0dp"
+                    android:layout_height="130dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/book"
+                    android:adjustViewBounds="true"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"/>
+
+                <TextView
+                    android:id="@+id/tvStretchTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="8dp"
+                    android:text="목 스트레칭 가이드"
+                    android:textColor="#3D2C1E"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivStretch" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="바로 시작하기 →"
+                    android:textSize="9sp"
+                    android:textColor="#B0998A"
+                    android:layout_margin="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"/>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

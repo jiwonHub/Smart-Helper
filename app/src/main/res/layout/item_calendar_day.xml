@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="68dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    android:background="@drawable/bg_calendar_cell"
+    android:paddingTop="6dp"
+    android:paddingBottom="4dp"
+    android:paddingStart="2dp"
+    android:paddingEnd="2dp">
+
+    <!-- 날짜 숫자 -->
+    <TextView
+        android:id="@+id/tvDay"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:gravity="center"
+        android:textSize="13sp"
+        android:textColor="#2D2D3A"
+        android:textStyle="bold"
+        android:background="@drawable/bg_day_default"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/iconRow1"/>
+
+    <!-- 아이콘 행 1 (최대 3개) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/iconRow1"
+        android:layout_width="wrap_content"
+        android:layout_height="8dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvDay"
+        app:layout_constraintBottom_toTopOf="@id/iconRow2">
+
+        <ImageView
+            android:id="@+id/ivIcon1"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@drawable/dot_green"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/ivIcon2"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@drawable/dot_green"
+            android:visibility="gone"
+            android:layout_marginStart="3dp"
+            app:layout_constraintStart_toEndOf="@id/ivIcon1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/ivIcon3"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@drawable/dot_orange"
+            android:visibility="gone"
+            android:layout_marginStart="3dp"
+            app:layout_constraintStart_toEndOf="@id/ivIcon2"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- 아이콘 행 2 -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/iconRow2"
+        android:layout_width="wrap_content"
+        android:layout_height="8dp"
+        android:layout_marginTop="2dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iconRow1"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <ImageView
+            android:id="@+id/ivIcon4"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@drawable/dot_orange"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageView
+            android:id="@+id/ivIcon5"
+            android:layout_width="7dp"
+            android:layout_height="7dp"
+            android:src="@drawable/dot_orange"
+            android:visibility="gone"
+            android:layout_marginStart="3dp"
+            app:layout_constraintStart_toEndOf="@id/ivIcon4"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

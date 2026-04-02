@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="#F5F7FA">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <!-- 좌측 컬러 바 (완료=초록, 예정=주황) -->
+        <View
+            android:id="@+id/viewColorBar"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_schedule_bar_done"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- 아이콘 (체크/시계) -->
+        <ImageView
+            android:id="@+id/ivScheduleIcon"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:src="@drawable/circle"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/viewColorBar"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- 오른쪽: 시간 + 내용 묶음 -->
+        <TextView
+            android:id="@+id/tvScheduleTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="08:00"
+            android:textSize="11sp"
+            android:textColor="#9AA0AF"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginStart="10dp"
+            app:layout_constraintStart_toEndOf="@id/ivScheduleIcon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tvScheduleText"/>
+
+        <TextView
+            android:id="@+id/tvScheduleText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="투약 완료"
+            android:textSize="13sp"
+            android:textColor="#2D2D3A"
+            android:textStyle="bold"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="2dp"
+            app:layout_constraintStart_toEndOf="@id/ivScheduleIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvScheduleTime"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

@@ -49,7 +49,7 @@ class ValueHistoryDialog(
     }
 
     private fun setupDialogAppearance() {
-        // ✅ 다이얼로그 배경 투명 + 둥근 모양 살리기
+        //  다이얼로그 배경 투명 + 둥근 모양 살리기
         dialog?.window?.apply {
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             setLayout(
@@ -58,13 +58,13 @@ class ValueHistoryDialog(
             )
         }
 
-        // ✅ 확인 버튼 색상 → 카테고리 accentColor
+        //  확인 버튼 색상 → 카테고리 accentColor
         binding.btnConfirm.backgroundTintList =
             android.content.res.ColorStateList.valueOf(accentColor)
     }
 
     private fun setupRecyclerView() {
-        // ✅ 초기 선택값 = 현재 기본값
+        //  초기 선택값 = 현재 기본값
         adapter = ValueHistoryAdapter(
             selectedValue  = currentDefault,
             onItemSelected = { /* 어댑터 내부에서 selectedValue 갱신 */ }
@@ -126,10 +126,10 @@ class ValueHistoryDialog(
     }
 
     private fun setupButtons() {
-        // ✅ 닫기
+        //  닫기
         binding.btnDialogClose.setOnClickListener { dismiss() }
 
-        // ✅ 확인 → 선택된 값 콜백
+        //  확인 → 선택된 값 콜백
         binding.btnConfirm.setOnClickListener {
             val selected = adapter.getSelectedValue()
             onConfirm(selected)

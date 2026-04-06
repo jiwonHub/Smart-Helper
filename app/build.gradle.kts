@@ -81,4 +81,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+
+    implementation("com.itextpdf:itext7-core:7.2.5")
+    implementation("com.itextpdf:html2pdf:4.0.5")
 }

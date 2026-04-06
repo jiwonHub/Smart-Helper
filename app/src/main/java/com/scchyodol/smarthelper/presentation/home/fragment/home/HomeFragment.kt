@@ -26,7 +26,7 @@ class HomeFragment : Fragment() {
         private const val TAG = "HomeFragment"
     }
 
-    // ✅ MainViewModel 하나로 전부 해결
+    //  MainViewModel 하나로 전부 해결
     private val viewModel: MainViewModel by activityViewModels()
 
     override fun onCreateView(

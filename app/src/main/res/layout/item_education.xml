@@ -131,7 +131,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!-- ✅ 하단 버튼 -->
+        <!--  하단 버튼 -->
         <TextView
             android:id="@+id/btnWatch"
             android:layout_width="match_parent"

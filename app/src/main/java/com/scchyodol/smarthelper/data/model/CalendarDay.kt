@@ -10,7 +10,12 @@ data class CalendarDay(
 )
 
 data class ScheduleItem(
+    val id       : Long   = 0L,
     val time: String,
     val label: String,
-    val isDone: Boolean
+    val category: String,
+    val value   : String? = null,
+    val memo    : String? = null,
+    val isDone: Boolean,
+    val isRepeat : Boolean = false
 )

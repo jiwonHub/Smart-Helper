@@ -11,7 +11,7 @@ import com.scchyodol.smarthelper.R
 
 class LoveMessageFragment : Fragment() {
 
-    // ✅ 더미 아이템 1개
+    //  더미 아이템 1개
     private val dummyItems = mutableListOf(
         LoveMessageItem(
             title    = "숫자세기",

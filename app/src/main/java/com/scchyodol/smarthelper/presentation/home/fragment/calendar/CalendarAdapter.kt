@@ -16,7 +16,7 @@ class CalendarAdapter(
 ) : RecyclerView.Adapter<CalendarAdapter.CalendarViewHolder>() {
 
     inner class CalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvDay: TextView     = itemView.findViewById(R.id.tvDay)       // ✅ XML ID 맞춤
+        val tvDay: TextView     = itemView.findViewById(R.id.tvDay)       //  XML ID 맞춤
         val ivIcon1: ImageView  = itemView.findViewById(R.id.ivIcon1)
         val ivIcon2: ImageView  = itemView.findViewById(R.id.ivIcon2)
         val ivIcon3: ImageView  = itemView.findViewById(R.id.ivIcon3)

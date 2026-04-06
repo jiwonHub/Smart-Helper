@@ -13,11 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingStart="12dp"
-        android:paddingEnd="12dp"
+        android:paddingEnd="4dp"
         android:paddingTop="12dp"
         android:paddingBottom="12dp">
 
-        <!-- 좌측 컬러 바 (완료=초록, 예정=주황) -->
         <View
             android:id="@+id/viewColorBar"
             android:layout_width="4dp"
@@ -27,7 +26,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <!-- 아이콘 (체크/시계) -->
         <ImageView
             android:id="@+id/ivScheduleIcon"
             android:layout_width="22dp"
@@ -38,7 +36,38 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <!-- 오른쪽: 시간 + 내용 묶음 -->
+        <ImageView
+            android:id="@+id/btnDeleteSchedule"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="삭제"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginEnd="10dp"
+            app:tint="#FF0000"/>
+
+        <TextView
+            android:id="@+id/tvRepeatTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="반복"
+            android:textSize="10sp"
+            android:textColor="#6C63FF"
+            android:textStyle="bold"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_repeat_tag"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/tvScheduleTime"
+            app:layout_constraintTop_toTopOf="@id/tvScheduleTime"
+            app:layout_constraintBottom_toBottomOf="@id/tvScheduleTime"/>
+
         <TextView
             android:id="@+id/tvScheduleTime"
             android:layout_width="wrap_content"
@@ -63,8 +92,9 @@
             android:textStyle="bold"
             android:layout_marginStart="10dp"
             android:layout_marginTop="2dp"
+            android:layout_marginEnd="4dp"
             app:layout_constraintStart_toEndOf="@id/ivScheduleIcon"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteSchedule"
             app:layout_constraintTop_toBottomOf="@id/tvScheduleTime"
             app:layout_constraintBottom_toBottomOf="parent"/>
 

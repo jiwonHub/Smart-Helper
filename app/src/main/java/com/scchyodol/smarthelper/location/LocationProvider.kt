@@ -15,7 +15,7 @@ class LocationProvider(context: Context) {
     private val fusedLocationClient =
         LocationServices.getFusedLocationProviderClient(context)
 
-    // ✅ 현재 위치를 한 번만 가져오는 suspend 함수
+    //  현재 위치를 한 번만 가져오는 suspend 함수
     @SuppressLint("MissingPermission")
     suspend fun getCurrentLocation(): Location {
         val cancellationTokenSource = CancellationTokenSource()
@@ -40,7 +40,7 @@ class LocationProvider(context: Context) {
                     continuation.resumeWithException(exception)
                 }
 
-            // ✅ 코루틴 취소 시 위치 요청도 취소
+            //  코루틴 취소 시 위치 요청도 취소
             continuation.invokeOnCancellation {
                 cancellationTokenSource.cancel()
             }

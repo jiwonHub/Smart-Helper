@@ -46,17 +46,17 @@ class ValueHistoryAdapter(
 
         holder.tvValue.text = item.value
 
-        // ✅ 현재 기본값 배지 표시
+        //  현재 기본값 배지 표시
         holder.tvBadge.visibility = if (item.isCurrentDefault) View.VISIBLE else View.GONE
 
-        // ✅ 선택 상태에 따라 circle 토글
+        //  선택 상태에 따라 circle 토글
         val isSelected = item.value == selectedValue
         holder.ivSelector.background = ContextCompat.getDrawable(
             ctx,
             if (isSelected) R.drawable.bg_circle_filled else R.drawable.bg_circle_empty
         )
 
-        // ✅ 아이템 전체 클릭
+        //  아이템 전체 클릭
         holder.itemView.setOnClickListener {
             val prev = selectedValue
             selectedValue = item.value

@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] ?: false
 
         if (fineGranted || coarseGranted) {
-            // ✅ 권한 받으면 여기서 fetchWeather 호출
+            //  권한 받으면 여기서 fetchWeather 호출
             viewModel.fetchWeather()
         } else {
             Snackbar.make(

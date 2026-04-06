@@ -2,7 +2,7 @@ package com.scchyodol.smarthelper.data.remote.dto
 
 import com.google.gson.annotations.SerializedName
 
-// ✅ 최상위 응답 전체
+//  최상위 응답 전체
 data class WeatherResponse(
 
     @SerializedName("latitude")
@@ -35,7 +35,7 @@ data class WeatherResponse(
     val current: CurrentWeather
 )
 
-// ✅ 단위 정보 (°C, % 등)
+//  단위 정보 (°C, % 등)
 data class CurrentUnits(
 
     @SerializedName("time")
@@ -51,7 +51,7 @@ data class CurrentUnits(
     val humidityUnit: String        // "%"
 )
 
-// ✅ 현재 날씨 실제 수치
+//  현재 날씨 실제 수치
 data class CurrentWeather(
 
     @SerializedName("time")

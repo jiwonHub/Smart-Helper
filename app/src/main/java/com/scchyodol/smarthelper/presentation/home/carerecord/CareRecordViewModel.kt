@@ -86,7 +86,7 @@ class CareRecordViewModel(
         val careCategory  = toCareCategory(category)
         val repeatDaysStr = repeatDaysList.sorted().joinToString(",")
 
-        // ✅ 레코드 1건만 저장
+        // 레코드 1건만 저장
         // timestamp = 반복 시작 기준 시각 (이 시각 이후의 해당 요일에만 표시)
         val record = CareRecord(
             timestamp  = baseTimestamp,

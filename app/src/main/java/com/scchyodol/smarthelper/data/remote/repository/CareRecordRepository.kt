@@ -75,17 +75,12 @@ class CareRecordRepository(
         }
     }
 
-    suspend fun insertAll(records: List<CareRecord>) {
-        dao.insertAll(records)
-    }
-
-    fun getRepeatRecords(): Flow<List<CareRecord>> {
-        return dao.getRepeatRecords()
-    }
-
     // 1회 조회용 (buildScheduleMap 내부에서 사용)
     suspend fun getRepeatRecordsOnce(): List<CareRecord> {
         return dao.getRepeatRecordsOnce()
     }
+
+    suspend fun getAllOnce(): List<CareRecord> = dao.getAllOnce()
+
 
 }

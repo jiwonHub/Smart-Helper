@@ -15,7 +15,7 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.68"/>
 
-    <!-- ✅ 좌측: 캘린더 카드 -->
+    <!--  좌측: 캘린더 카드 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardCalendar"
         android:layout_width="0dp"
@@ -38,7 +38,7 @@
             android:paddingTop="20dp"
             android:paddingBottom="12dp">
 
-            <!-- ✅ 헤더 배경 (그라디언트) -->
+            <!--  헤더 배경 (그라디언트) -->
             <View
                 android:id="@+id/calendarHeaderBg"
                 android:layout_width="0dp"
@@ -97,7 +97,15 @@
                 app:layout_constraintBottom_toBottomOf="@id/tvMonthYear"
                 app:tint="#FFFFFF" />
 
-
+            <ImageView
+                android:id="@+id/dataOtpt"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_margin="12dp"
+                android:src="@drawable/share"
+                app:tint="#FFFFFF"/>
 
             <!-- 요일 헤더 -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -201,7 +209,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 우측 일정 패널 -->
+    <!--  우측 일정 패널 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardSchedulePanel"
         android:layout_width="0dp"
@@ -241,9 +249,21 @@
                 android:paddingStart="18dp"
                 android:paddingEnd="18dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/btnDateDetail"
                 app:layout_constraintTop_toTopOf="@id/panelHeaderBg"
                 app:layout_constraintBottom_toBottomOf="@id/panelHeaderBg"/>
+
+            <ImageView
+                android:id="@+id/btnDateDetail"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                app:layout_constraintStart_toEndOf="@id/tvSelectedDate"
+                app:layout_constraintTop_toTopOf="@id/tvSelectedDate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/tvSelectedDate"
+                android:src="@drawable/info"
+                android:layout_marginEnd="20dp"
+                app:tint="#FFFFFF"/>
 
             <!-- 일정 없을 때 표시 -->
             <TextView

@@ -7,7 +7,7 @@
     android:layout_marginBottom="70dp"
     android:background="#F4F6FB">
 
-    <!-- ✅ 상단 헤더 (카테고리 색상으로 동적 변경) -->
+    <!--  상단 헤더 (카테고리 색상으로 동적 변경) -->
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -106,7 +106,7 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- ✅ 스크롤 컨텐츠 -->
+    <!--  스크롤 컨텐츠 -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -121,7 +121,7 @@
             android:padding="20dp"
             android:paddingBottom="100dp">
 
-            <!-- ✅ 날짜 & 시간 카드 -->
+            <!--  날짜 & 시간 카드 -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -399,7 +399,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- ✅ 세부 내용 카드 (카테고리별 동적 변경 가능) -->
+            <!--  세부 내용 카드 (카테고리별 동적 변경 가능) -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardDetail"
                 android:layout_width="match_parent"
@@ -502,7 +502,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- ✅ 메모 카드 -->
+            <!--  메모 카드 -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -570,7 +570,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- ✅ 하단 저장 버튼 (Floating) -->
+    <!--  하단 저장 버튼 (Floating) -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

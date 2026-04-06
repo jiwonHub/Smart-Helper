@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:padding="20dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:cardBackgroundColor="#F8F9FC">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="14dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp">
+
+        <!-- 좌측 컬러 바 -->
+        <View
+            android:id="@+id/viewDetailColorBar"
+            android:layout_width="4dp"
+            android:layout_height="0dp"
+            android:background="@drawable/bg_schedule_bar_done"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <!-- 시간 -->
+        <TextView
+            android:id="@+id/tvDetailTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="08:00"
+            android:textSize="11sp"
+            android:textColor="#9AA0AF"
+            android:textStyle="bold"
+            android:letterSpacing="0.05"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@id/viewDetailColorBar"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 카테고리 -->
+        <TextView
+            android:id="@+id/tvDetailCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="투약"
+            android:textSize="11sp"
+            android:textColor="#6C63FF"
+            android:textStyle="bold"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:background="@drawable/bg_category_tag"
+            android:layout_marginStart="8dp"
+            app:layout_constraintStart_toEndOf="@id/tvDetailTime"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <!-- 수행 태그 -->
+        <TextView
+            android:id="@+id/tvDetailDoneTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="완료"
+            android:textSize="10sp"
+            android:textColor="#27AE60"
+            android:textStyle="bold"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:background="@drawable/bg_done_tag"
+            android:layout_marginStart="5dp"
+            app:layout_constraintStart_toEndOf="@id/tvDetailCategory"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <!-- 반복 태그 -->
+        <TextView
+            android:id="@+id/tvDetailRepeatTag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="반복"
+            android:textSize="10sp"
+            android:textColor="#6C63FF"
+            android:textStyle="bold"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:background="@drawable/bg_repeat_tag"
+            android:visibility="gone"
+            android:layout_marginStart="5dp"
+            app:layout_constraintStart_toEndOf="@id/tvDetailDoneTag"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <!-- 일정 이름 -->
+        <TextView
+            android:id="@+id/tvDetailLabel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="혈압약 복용"
+            android:textSize="14sp"
+            android:textColor="#1A1A2E"
+            android:textStyle="bold"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="8dp"
+            android:paddingStart="4dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDetailTime"/>
+
+        <!-- 수정 버튼 -->
+        <ImageView
+            android:id="@+id/btnEditDetail"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/edit"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="수정"
+            android:layout_marginEnd="18dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintEnd_toStartOf="@id/btnDeleteDetail"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:tint="@color/black"/>
+
+        <!-- 삭제 버튼 -->
+        <ImageView
+            android:id="@+id/btnDeleteDetail"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="삭제"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_margin="8dp"
+            app:tint="#FF0000"/>
+
+        <!-- 수치 -->
+        <TextView
+            android:id="@+id/tvDetailValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="수치: 120/80"
+            android:textSize="12sp"
+            android:textColor="#666680"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/viewDetailColorBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDetailLabel"/>
+
+        <!-- 메모 -->
+        <TextView
+            android:id="@+id/tvDetailMemo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="메모"
+            android:textSize="12sp"
+            android:textColor="#888899"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="2dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/viewDetailColorBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDetailValue"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

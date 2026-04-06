@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- ✅ 상단 배너 -->
+        <!--  상단 배너 -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,7 +65,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- ✅ 녹음 컨테이너 -->
+        <!--  녹음 컨테이너 -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- ✅ 저장된 메시지 타이틀 -->
+        <!--  저장된 메시지 타이틀 -->
         <TextView
             android:id="@+id/tvSavedTitle"
             android:layout_width="wrap_content"
@@ -130,7 +130,7 @@
             android:layout_marginBottom="10dp"
             android:layout_marginStart="4dp"/>
 
-        <!-- ✅ 저장된 메시지 리스트 -->
+        <!--  저장된 메시지 리스트 -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMessages"
             android:layout_width="match_parent"

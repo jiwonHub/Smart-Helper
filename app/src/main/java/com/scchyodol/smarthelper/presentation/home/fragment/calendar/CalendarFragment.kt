@@ -5,19 +5,26 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.scchyodol.smarthelper.R
 import com.scchyodol.smarthelper.data.model.CalendarDay
 import com.scchyodol.smarthelper.data.model.ScheduleItem
+import com.scchyodol.smarthelper.databinding.FragmentCalendarBinding
+import com.scchyodol.smarthelper.presentation.home.main.DeleteState
+import com.scchyodol.smarthelper.presentation.home.main.ExportState
 import com.scchyodol.smarthelper.presentation.home.main.MainViewModel
 import kotlinx.coroutines.launch
+import java.io.File
 import java.util.Calendar
 
 class CalendarFragment : Fragment() {
@@ -26,13 +33,8 @@ class CalendarFragment : Fragment() {
         private const val TAG = "CalendarFragment"
     }
 
-    private lateinit var rvCalendar: RecyclerView
-    private lateinit var rvSchedule: RecyclerView
-    private lateinit var tvMonthYear: TextView
-    private lateinit var tvSelectedDate: TextView
-    private lateinit var tvEmptySchedule: TextView
-    private lateinit var btnPrevMonth: ImageView
-    private lateinit var btnNextMonth: ImageView
+    private var _binding: FragmentCalendarBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var calendarAdapter: CalendarAdapter
     private lateinit var scheduleAdapter: ScheduleAdapter
@@ -41,55 +43,88 @@ class CalendarFragment : Fragment() {
     private var selectedDay: Int = -1
     private var currentScheduleMap: Map<Int, List<ScheduleItem>> = emptyMap()
 
-    // ✅ Activity 스코프 ViewModel 사용
     private val viewModel: MainViewModel by activityViewModels()
 
+    private var loadingDialog: AlertDialog? = null
+    private var currentDetailDialog: AlertDialog? = null
+
+    // ── 생명주기 ─────────────────────────────────────────────────
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val view = inflater.inflate(R.layout.fragment_calendar, container, false)
-        bindViews(view)
+        _binding = FragmentCalendarBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         setupCalendarRecyclerView()
         setupScheduleRecyclerView()
         setupMonthNavigation()
+        setupButton()
         observeViewModel()
         loadCurrentMonth()
-        return view
     }
 
-    // ── View 바인딩 ──────────────────────────────────────────────
-    private fun bindViews(view: View) {
-        rvCalendar      = view.findViewById(R.id.rvCalendar)
-        rvSchedule      = view.findViewById(R.id.rvSchedule)
-        tvMonthYear     = view.findViewById(R.id.tvMonthYear)
-        tvSelectedDate  = view.findViewById(R.id.tvSelectedDate)
-        tvEmptySchedule = view.findViewById(R.id.tvEmptySchedule)
-        btnPrevMonth    = view.findViewById(R.id.btnPrevMonth)
-        btnNextMonth    = view.findViewById(R.id.btnNextMonth)
-
-        btnPrevMonth.setColorFilter(
-            android.graphics.Color.WHITE,
-            android.graphics.PorterDuff.Mode.SRC_IN
-        )
-        btnNextMonth.setColorFilter(
-            android.graphics.Color.WHITE,
-            android.graphics.PorterDuff.Mode.SRC_IN
-        )
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     // ── ViewModel 옵저빙 ─────────────────────────────────────────
     private fun observeViewModel() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // ✅ MainViewModel의 scheduleMap 구독
-            // DB에 데이터 저장되는 순간 자동으로 여기로 push됨
-            viewModel.scheduleMap.collect { scheduleMap ->
-                Log.d(TAG, "scheduleMap 업데이트 - 날짜 수: ${scheduleMap.size}")
-                currentScheduleMap = scheduleMap
-                renderCalendar()
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                if (selectedDay != -1) {
-                    onDaySelected(selectedDay)
+                // 캘린더 스케줄 맵
+                launch {
+                    viewModel.scheduleMap.collect { scheduleMap ->
+                        Log.d(TAG, "scheduleMap 업데이트 - 날짜 수: ${scheduleMap.size}")
+                        currentScheduleMap = scheduleMap
+                        renderCalendar()
+                        if (selectedDay != -1) onDaySelected(selectedDay)
+                    }
+                }
+
+                // PDF 내보내기 상태
+                launch {
+                    viewModel.exportState.collect { state ->
+                        when (state) {
+                            is ExportState.Loading -> showLoadingDialog()
+                            is ExportState.Success -> {
+                                hideLoadingDialog()
+                                showOpenPdfDialog(state.file)
+                                viewModel.resetExportState()
+                            }
+                            is ExportState.Error -> {
+                                hideLoadingDialog()
+                                Toast.makeText(requireContext(), state.message, Toast.LENGTH_SHORT).show()
+                                viewModel.resetExportState()
+                            }
+                            is ExportState.Idle -> Unit
+                        }
+                    }
+                }
+
+                launch {
+                    viewModel.deleteState.collect { state ->
+                        when (state) {
+                            is DeleteState.Loading -> { /* 필요시 로딩 표시 */ }
+                            is DeleteState.Success -> {
+                                Toast.makeText(requireContext(), "일정이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                                // 다이얼로그가 열려있으면 닫기
+                                currentDetailDialog?.dismiss()
+                                currentDetailDialog = null
+                                viewModel.resetDeleteState()
+                            }
+                            is DeleteState.Error -> {
+                                Toast.makeText(requireContext(), "삭제 실패: ${state.message}", Toast.LENGTH_SHORT).show()
+                                viewModel.resetDeleteState()
+                            }
+                            is DeleteState.Idle -> Unit
+                        }
+                    }
                 }
             }
         }
@@ -101,25 +136,21 @@ class CalendarFragment : Fragment() {
         val month = calendar.get(Calendar.MONTH)
         selectedDay = getDefaultSelectedDay(year, month)
         renderCalendar()
-        // ✅ MainViewModel에 데이터 요청
         viewModel.loadCalendarMonth(year, month)
     }
 
     private fun getDefaultSelectedDay(year: Int, month: Int): Int {
-        val today      = Calendar.getInstance()
-        val todayYear  = today.get(Calendar.YEAR)
-        val todayMonth = today.get(Calendar.MONTH)
-        val todayDay   = today.get(Calendar.DAY_OF_MONTH)
-        return if (year == todayYear && month == todayMonth) todayDay else 1
+        val today = Calendar.getInstance()
+        return if (year == today.get(Calendar.YEAR) && month == today.get(Calendar.MONTH))
+            today.get(Calendar.DAY_OF_MONTH) else 1
     }
 
     private fun getLastDayOfMonth(year: Int, month: Int): Int {
-        val tempCal = Calendar.getInstance()
-        tempCal.set(year, month, 1)
-        return tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        return Calendar.getInstance().apply { set(year, month, 1) }
+            .getActualMaximum(Calendar.DAY_OF_MONTH)
     }
 
-    // ── 캘린더 RecyclerView 셋업 ─────────────────────────────────
+    // ── 캘린더 RecyclerView ──────────────────────────────────────
     private fun setupCalendarRecyclerView() {
         calendarAdapter = CalendarAdapter(emptyList()) { day ->
             if (day.dayNumber == 0) return@CalendarAdapter
@@ -127,42 +158,66 @@ class CalendarFragment : Fragment() {
             onDaySelected(day.dayNumber)
             renderCalendar()
         }
-        rvCalendar.layoutManager = GridLayoutManager(requireContext(), 7)
-        rvCalendar.adapter = calendarAdapter
+        binding.rvCalendar.layoutManager = GridLayoutManager(requireContext(), 7)
+        binding.rvCalendar.adapter = calendarAdapter
     }
 
-    // ── 일정 RecyclerView 셋업 ───────────────────────────────────
+    // ── 일정 RecyclerView ────────────────────────────────────────
     private fun setupScheduleRecyclerView() {
-        scheduleAdapter = ScheduleAdapter(emptyList())
-        rvSchedule.layoutManager = LinearLayoutManager(requireContext())
-        rvSchedule.adapter = scheduleAdapter
+        scheduleAdapter = ScheduleAdapter(emptyList()) { item, position ->
+            this@CalendarFragment.showDeleteDialog(item)
+        }
+        binding.rvSchedule.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvSchedule.adapter = scheduleAdapter
     }
 
     // ── 이전/다음 달 버튼 ────────────────────────────────────────
     private fun setupMonthNavigation() {
-        btnPrevMonth.setOnClickListener {
-            calendar.add(Calendar.MONTH, -1)
-            val year  = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            selectedDay = getLastDayOfMonth(year, month)
-            currentScheduleMap = emptyMap()
-            renderCalendar()
-            onDaySelected(selectedDay)
-            // ✅ 이전 달 데이터 요청
-            viewModel.loadCalendarMonth(year, month)
+        binding.btnPrevMonth.apply {
+            setColorFilter(
+                android.graphics.Color.WHITE,
+                android.graphics.PorterDuff.Mode.SRC_IN
+            )
+            setOnClickListener {
+                calendar.add(Calendar.MONTH, -1)
+                val year  = calendar.get(Calendar.YEAR)
+                val month = calendar.get(Calendar.MONTH)
+                selectedDay        = getLastDayOfMonth(year, month)
+                currentScheduleMap = emptyMap()
+                renderCalendar()
+                onDaySelected(selectedDay)
+                viewModel.loadCalendarMonth(year, month)
+            }
         }
 
-        btnNextMonth.setOnClickListener {
-            calendar.add(Calendar.MONTH, 1)
-            val year  = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
-            selectedDay = 1
-            currentScheduleMap = emptyMap()
-            renderCalendar()
-            onDaySelected(selectedDay)
-            // ✅ 다음 달 데이터 요청
-            viewModel.loadCalendarMonth(year, month)
+        binding.btnNextMonth.apply {
+            setColorFilter(
+                android.graphics.Color.WHITE,
+                android.graphics.PorterDuff.Mode.SRC_IN
+            )
+            setOnClickListener {
+                calendar.add(Calendar.MONTH, 1)
+                val year  = calendar.get(Calendar.YEAR)
+                val month = calendar.get(Calendar.MONTH)
+                selectedDay        = 1
+                currentScheduleMap = emptyMap()
+                renderCalendar()
+                onDaySelected(selectedDay)
+                viewModel.loadCalendarMonth(year, month)
+            }
         }
+    }
+
+    // ── 내보내기 버튼 ─────────────────────────────────────────────
+    private fun setupButton() {
+        binding.dataOtpt.setOnClickListener {
+            showExportDialog()
+        }
+        binding.btnDateDetail.setOnClickListener {
+            val schedules = currentScheduleMap[selectedDay] ?: emptyList()
+            showDateDetailDialog(selectedDay, schedules)
+        }
+
     }
 
     // ── 달력 렌더링 ──────────────────────────────────────────────
@@ -170,25 +225,22 @@ class CalendarFragment : Fragment() {
         val year  = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
 
-        tvMonthYear.text = "${year}년 ${month + 1}월"
+        binding.tvMonthYear.text = "${year}년 ${month + 1}월"
 
         val today          = Calendar.getInstance()
         val isCurrentMonth = today.get(Calendar.YEAR) == year && today.get(Calendar.MONTH) == month
         val todayDay       = if (isCurrentMonth) today.get(Calendar.DAY_OF_MONTH) else -1
 
-        val tempCal = Calendar.getInstance()
-        tempCal.set(year, month, 1)
+        val tempCal = Calendar.getInstance().apply { set(year, month, 1) }
         val firstDayOfWeek = tempCal.get(Calendar.DAY_OF_WEEK) - 1
         val maxDay         = tempCal.getActualMaximum(Calendar.DAY_OF_MONTH)
 
         val dayList = mutableListOf<CalendarDay>()
 
-        // 앞 빈 칸
         repeat(firstDayOfWeek) { col ->
             dayList.add(CalendarDay(dayNumber = 0, dayOfWeek = col))
         }
 
-        // 날짜 채우기
         for (d in 1..maxDay) {
             val col       = (firstDayOfWeek + d - 1) % 7
             val schedules = currentScheduleMap[d]
@@ -204,29 +256,157 @@ class CalendarFragment : Fragment() {
             )
         }
 
-        // 뒷 빈 칸 (42칸 고정)
         val remaining = 42 - dayList.size
         repeat(remaining) { dayList.add(CalendarDay(dayNumber = 0)) }
 
         calendarAdapter.updateDays(dayList)
     }
 
-    // ── 날짜 클릭 → 우측 패널 업데이트 ─────────────────────────
+    // ── 날짜 클릭 → 일정 패널 업데이트 ─────────────────────────
     private fun onDaySelected(day: Int) {
         val month = calendar.get(Calendar.MONTH) + 1
-        tvSelectedDate.text = "${month}월 ${day}일"
+        binding.tvSelectedDate.text = "${month}월 ${day}일"
 
         val schedules = currentScheduleMap[day] ?: emptyList()
-
         Log.d(TAG, "날짜 선택 - ${month}월 ${day}일, 기록 수: ${schedules.size}")
 
         if (schedules.isEmpty()) {
-            tvEmptySchedule.visibility = View.VISIBLE
-            rvSchedule.visibility      = View.GONE
+            binding.tvEmptySchedule.visibility = View.VISIBLE
+            binding.rvSchedule.visibility      = View.GONE
         } else {
-            tvEmptySchedule.visibility = View.GONE
-            rvSchedule.visibility      = View.VISIBLE
+            binding.tvEmptySchedule.visibility = View.GONE
+            binding.rvSchedule.visibility      = View.VISIBLE
             scheduleAdapter.updateItems(schedules)
         }
+    }
+
+    // ── 내보내기 다이얼로그 ───────────────────────────────────────
+    private fun showExportDialog() {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_data_export, null)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        dialogView.findViewById<View>(R.id.btnExportPdf).setOnClickListener {
+            dialog.dismiss()
+            viewModel.exportCurrentMonthToPdf()
+        }
+
+        dialogView.findViewById<View>(R.id.btnExportCsv).setOnClickListener {
+            Toast.makeText(requireContext(), "준비 중인 기능입니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        dialogView.findViewById<View>(R.id.btnExportShare).setOnClickListener {
+            Toast.makeText(requireContext(), "준비 중인 기능입니다.", Toast.LENGTH_SHORT).show()
+        }
+
+        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showDateDetailDialog(day: Int, schedules: List<ScheduleItem>) {
+        val dialogView = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_date_detail, null)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        // ← 이 부분이 누락되었었음!
+        currentDetailDialog = dialog
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        // 날짜 텍스트
+        val month = calendar.get(Calendar.MONTH) + 1
+        dialogView.findViewById<TextView>(R.id.tvDialogDate).text = "${month}월 ${day}일 상세 일정"
+
+        // 리사이클러뷰
+        val rv    = dialogView.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvDetailSchedule)
+        val empty = dialogView.findViewById<TextView>(R.id.tvDetailEmpty)
+
+        if (schedules.isEmpty()) {
+            rv.visibility    = View.GONE
+            empty.visibility = View.VISIBLE
+        } else {
+            rv.visibility    = View.VISIBLE
+            empty.visibility = View.GONE
+            rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+            rv.adapter       = ScheduleDetailAdapter(schedules) { item, _ ->
+                showDeleteDialog(item)
+            }
+        }
+
+        // 닫기 버튼들
+        dialogView.findViewById<View>(R.id.btnDialogClose).setOnClickListener {
+            dialog.dismiss()
+            currentDetailDialog = null
+        }
+        dialogView.findViewById<View>(R.id.btnDetailClose).setOnClickListener {
+            dialog.dismiss()
+            currentDetailDialog = null
+        }
+
+        // 다이얼로그가 닫힐 때 참조 해제
+        dialog.setOnDismissListener {
+            currentDetailDialog = null
+        }
+
+        dialog.show()
+    }
+
+    // ── PDF 열기 확인 팝업 ────────────────────────────────────────
+    private fun showOpenPdfDialog(file: File) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("PDF 저장 완료")
+            .setMessage("""
+            리포트가 다운로드 폴더에 저장되었습니다.
+            
+            📂 파일명: ${file.name}
+            💾 위치: Downloads 폴더
+        """.trimIndent())
+            .setPositiveButton("확인", null)
+            .show()
+    }
+
+    // ── 로딩 다이얼로그 ───────────────────────────────────────────
+    private fun showLoadingDialog() {
+        loadingDialog = AlertDialog.Builder(requireContext())
+            .setMessage("PDF 생성 중...")
+            .setCancelable(false)
+            .create()
+        loadingDialog?.show()
+    }
+
+    private fun showDeleteDialog(item: ScheduleItem) {
+        if (item.isRepeat) {
+            showDeleteDialog(item, "반복 일정 삭제", "선택하신 '${item.label}' 일정은 반복 일정이므로 해당 모든 반복 일정이 삭제됩니다. 그래도 삭제하시겠습니까?")
+        } else {
+            showDeleteDialog(item, "일정 삭제", "'${item.label}' 일정을 삭제하시겠습니까?")
+        }
+    }
+
+    private fun showDeleteDialog(item: ScheduleItem, title: String, description: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(title)
+            .setMessage(description)
+            .setPositiveButton("삭제") { _, _ ->
+                viewModel.deleteSchedule(item.id)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+
+    private fun hideLoadingDialog() {
+        loadingDialog?.dismiss()
+        loadingDialog = null
     }
 }

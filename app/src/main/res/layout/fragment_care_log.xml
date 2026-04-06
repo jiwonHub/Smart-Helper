@@ -29,7 +29,7 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.67"/>
 
-    <!-- ✅ 1. 투약 -->
+    <!--  1. 투약 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnMedication"
         android:layout_width="0dp"
@@ -90,7 +90,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 2. 수면 -->
+    <!--  2. 수면 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnSleep"
         android:layout_width="0dp"
@@ -150,7 +150,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 3. 식사 -->
+    <!--  3. 식사 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnSiksa"
         android:layout_width="0dp"
@@ -210,7 +210,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 4. 배변 -->
+    <!--  4. 배변 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnExcretion"
         android:layout_width="0dp"
@@ -270,7 +270,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 5. 체온/SpO2 -->
+    <!--  5. 체온/SpO2 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnVitals"
         android:layout_width="0dp"
@@ -330,7 +330,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 6. 기타 -->
+    <!--  6. 기타 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/btnOther"
         android:layout_width="0dp"

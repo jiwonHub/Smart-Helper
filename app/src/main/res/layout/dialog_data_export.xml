@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_dialog_export">
+
+    <!-- 제목 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="데이터 내보내기"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="형식을 선택해주세요"
+        android:textSize="13sp"
+        android:textColor="@color/gray"
+        android:layout_marginBottom="24dp" />
+
+    <!-- PDF 버튼 -->
+    <LinearLayout
+        android:id="@+id/btnExportPdf"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_export_option"
+        android:padding="16dp"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/pdf"
+            android:layout_marginEnd="12dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PDF 파일"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="보기 좋은 리포트 형식"
+                android:textSize="11sp"
+                android:textColor="@color/gray" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- CSV 버튼 (비활성화 표시) -->
+    <LinearLayout
+        android:id="@+id/btnExportCsv"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_export_option_disabled"
+        android:padding="16dp"
+        android:alpha="0.4"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/csv"
+            android:layout_marginEnd="12dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CSV 파일"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="준비 중"
+                android:textSize="11sp"
+                android:textColor="@color/gray" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 메일/SMS 버튼 (비활성화 표시) -->
+    <LinearLayout
+        android:id="@+id/btnExportShare"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_export_option_disabled"
+        android:padding="16dp"
+        android:alpha="0.4"
+        android:layout_marginBottom="24dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/share"
+            android:layout_marginEnd="12dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="메일 / SMS"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="준비 중"
+                android:textSize="11sp"
+                android:textColor="@color/gray" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 취소 버튼 -->
+    <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="취소"
+        style="@style/Widget.AppCompat.Button.Borderless" />
+
+</LinearLayout>

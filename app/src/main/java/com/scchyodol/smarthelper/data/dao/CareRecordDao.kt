@@ -32,6 +32,9 @@ interface CareRecordDao {
     @Query("SELECT * FROM care_records ORDER BY timestamp DESC")
     fun getAll(): Flow<List<CareRecord>>
 
+    @Query("SELECT * FROM care_records ORDER BY timestamp ASC")
+    suspend fun getAllOnce(): List<CareRecord>
+
     // id로 단건 조회
     @Query("SELECT * FROM care_records WHERE id = :id")
     suspend fun getById(id: Long): CareRecord?

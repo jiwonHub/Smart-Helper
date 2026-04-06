@@ -24,7 +24,7 @@ class WeatherRepository(context: Context) {
             Result.Success(response)
 
         } catch (e: CancellationException) {
-            // ✅ 코루틴 취소는 반드시 다시 던져야 함
+            //  코루틴 취소는 반드시 다시 던져야 함
             // 삼키면 코루틴이 정상 종료인 줄 알고 이상하게 동작함
             throw e
 

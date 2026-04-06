@@ -15,7 +15,7 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.70"/>
 
-    <!-- ✅ 좌측: 다음 할 일 그라디언트 카드 -->
+    <!--  좌측: 다음 할 일 그라디언트 카드 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardNextTask"
         android:layout_width="0dp"
@@ -64,7 +64,7 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"/>
 
-            <!-- ✅ 흰색 테두리 컨테이너 (서브타이틀 + 카운트다운 감싸기) -->
+            <!--  흰색 테두리 컨테이너 (서브타이틀 + 카운트다운 감싸기) -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/containerTaskInfo"
                 android:layout_width="0dp"
@@ -115,7 +115,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 우측 상단: 환경 정보 카드 -->
+    <!--  우측 상단: 환경 정보 카드 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardWeather"
         android:layout_width="0dp"
@@ -222,7 +222,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- ✅ 우측 하단: 보호자 격려 메시지 카드 -->
+    <!--  우측 하단: 보호자 격려 메시지 카드 -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardGuardianMessage"
         android:layout_width="0dp"

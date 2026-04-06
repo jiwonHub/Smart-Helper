@@ -12,9 +12,9 @@ data class UserMood(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 
-    // ✅ 날짜 (밀리세컨드)
+    //  날짜 (밀리세컨드)
     val date: Long,
 
-    // ✅ 기분 (Enum → TypeConverter로 String 저장)
+    //  기분 (Enum → TypeConverter로 String 저장)
     val mood: Mood
 )

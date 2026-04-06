@@ -9,20 +9,49 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.scchyodol.smarthelper.data.db.AppDatabase
 import com.scchyodol.smarthelper.data.model.CareRecord
+import com.scchyodol.smarthelper.data.model.Mood
 import com.scchyodol.smarthelper.data.model.ScheduleItem
 import com.scchyodol.smarthelper.data.model.User
+import com.scchyodol.smarthelper.data.model.UserMood
 import com.scchyodol.smarthelper.data.remote.dto.WeatherResponse
 import com.scchyodol.smarthelper.data.remote.repository.CareRecordRepository
+import com.scchyodol.smarthelper.data.remote.repository.UserMoodRepository
 import com.scchyodol.smarthelper.data.remote.repository.WeatherRepository
+import com.scchyodol.smarthelper.util.ReportGenerator
 import com.scchyodol.smarthelper.util.Result
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.coroutines.cancellation.CancellationException
+
+sealed class ExportState {
+    object Idle    : ExportState()
+    object Loading : ExportState()
+    data class Success(val file: File) : ExportState()
+    data class Error(val message: String) : ExportState()
+}
+
+// ─── 무드 ────────────────────────────────────────
+sealed class MoodSaveState {
+    object Idle    : MoodSaveState()
+    object Loading : MoodSaveState()
+    object Success : MoodSaveState()
+    data class Error(val message: String) : MoodSaveState()
+}
+
+sealed class DeleteState {
+    object Idle    : DeleteState()
+    object Loading : DeleteState()
+    object Success : DeleteState()
+    data class Error(val message: String) : DeleteState()
+}
 
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -46,10 +75,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var weatherJob: Job? = null
     private var periodicWeatherJob: Job? = null
 
-    // ─── CareRecord Repository (공용) ────────────────
+    // ─── CareRecord Repository ────────────────────
     private val careRecordRepository: CareRecordRepository by lazy {
         val dao = AppDatabase.getInstance(application).careRecordDao()
         CareRecordRepository(dao)
+    }
+
+    // ─── UserMood Repository ──────────────────────
+    private val userMoodRepository: UserMoodRepository by lazy {
+        val dao = AppDatabase.getInstance(application).userMoodDao()
+        UserMoodRepository(dao)
     }
 
     // ─── 다음 할 일 ──────────────────────────────────
@@ -62,16 +97,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var countdownJob: Job? = null
 
     // ─── 캘린더 ──────────────────────────────────────
-    // CalendarFragment에서 현재 보고 있는 연/월
     private val _calendarYear  = MutableStateFlow(Calendar.getInstance().get(Calendar.YEAR))
     private val _calendarMonth = MutableStateFlow(Calendar.getInstance().get(Calendar.MONTH))
 
-    // 날짜(일) → ScheduleItem 리스트 맵
     private val _scheduleMap = MutableStateFlow<Map<Int, List<ScheduleItem>>>(emptyMap())
     val scheduleMap: StateFlow<Map<Int, List<ScheduleItem>>> = _scheduleMap
 
-    // 현재 캘린더 로드 Job
     private var calendarLoadJob: Job? = null
+
+    private val _exportState = MutableStateFlow<ExportState>(ExportState.Idle)
+    val exportState: StateFlow<ExportState> = _exportState
+
+    private val reportGenerator = ReportGenerator()
+
+    private val _moodSaveState = MutableStateFlow<MoodSaveState>(MoodSaveState.Idle)
+    val moodSaveState: StateFlow<MoodSaveState> = _moodSaveState
+
+    private val _deleteState = MutableStateFlow<DeleteState>(DeleteState.Idle)
+    val deleteState: StateFlow<DeleteState> = _deleteState
+
+    // 오늘 무드
+    private val _todayMood = MutableStateFlow<Mood?>(null)
+    val todayMood: StateFlow<Mood?> = _todayMood
+
+    // 월별 무드 맵 (day → UserMood)
+    private val _monthMoodMap = MutableStateFlow<Map<Int, UserMood>>(emptyMap())
+    val monthMoodMap: StateFlow<Map<Int, UserMood>> = _monthMoodMap
+
+    private var moodLoadJob: Job? = null
 
     // ─── init ────────────────────────────────────────
     init {
@@ -79,14 +132,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         fetchWeather()
         startPeriodicWeatherUpdates()
         loadNextTask()
-        // 초기 캘린더 데이터 로드
-        loadCalendarMonth(
-            _calendarYear.value,
-            _calendarMonth.value
-        )
+        loadCalendarMonth(_calendarYear.value, _calendarMonth.value)
+        // 무드
+        loadTodayMood()
+        val now = Calendar.getInstance()
+        loadMonthMoods(now.get(Calendar.YEAR), now.get(Calendar.MONTH))
     }
 
-    // ─── 유저 메서드 ──────────────────────────────────
+    // ─── 유저 ────────────────────────────────────────
     private fun loadCurrentUser() {
         val firebaseUser = auth.currentUser
         _user.value = if (firebaseUser != null) {
@@ -101,7 +154,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun refreshUser() { loadCurrentUser() }
 
-    // ─── 날씨 메서드 ──────────────────────────────────
+    // ─── 날씨 ────────────────────────────────────────
     fun fetchWeather() {
         weatherJob?.cancel()
         weatherJob = viewModelScope.launch {
@@ -147,23 +200,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun refreshWeatherManually() {
-        fetchWeather()
-    }
+    fun refreshWeatherManually() { fetchWeather() }
 
-    // ─── 다음 할 일 메서드 ────────────────────────────
+    // ─── 다음 할 일 ──────────────────────────────────
     private fun loadNextTask() {
         viewModelScope.launch {
             try {
                 careRecordRepository.getAll().collect { records ->
                     val now = System.currentTimeMillis()
 
-                    // ✅ 일반 레코드: timestamp가 미래인 것
                     val nextNormal = records
                         .filter { !it.isRepeat && it.timestamp > now }
                         .minByOrNull { it.timestamp }
 
-                    // ✅ 반복 레코드: repeatDays 기반으로 다음 발생 시각 계산
                     val nextRepeatPair = records
                         .filter { it.isRepeat && it.repeatDays.isNotBlank() }
                         .mapNotNull { record ->
@@ -172,7 +221,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         }
                         .minByOrNull { it.second }
 
-                    // 둘 중 더 가까운 것 선택
                     val next: CareRecord?
                     val nextTimestamp: Long
 
@@ -182,7 +230,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                             nextTimestamp = 0L
                         }
                         nextNormal == null -> {
-                            next          = nextRepeatPair!!.first
+                            next          = nextRepeatPair!!.first.copy(timestamp = nextRepeatPair.second)
                             nextTimestamp = nextRepeatPair.second
                         }
                         nextRepeatPair == null -> {
@@ -194,7 +242,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 next          = nextNormal
                                 nextTimestamp = nextNormal.timestamp
                             } else {
-                                next          = nextRepeatPair.first
+                                next          = nextRepeatPair.first.copy(timestamp = nextRepeatPair.second)
                                 nextTimestamp = nextRepeatPair.second
                             }
                         }
@@ -235,12 +283,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         if (targetCalendarDays.isEmpty()) return null
 
-        // 기준 시:분 추출
         val baseCal    = Calendar.getInstance().apply { timeInMillis = record.timestamp }
         val baseHour   = baseCal.get(Calendar.HOUR_OF_DAY)
         val baseMinute = baseCal.get(Calendar.MINUTE)
 
-        // 오늘부터 7일 이내에서 다음 발생일 탐색
         val iterCal = Calendar.getInstance().apply {
             timeInMillis = now
             set(Calendar.SECOND, 0)
@@ -257,7 +303,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     set(Calendar.SECOND, 0)
                     set(Calendar.MILLISECOND, 0)
                 }
-                // 현재 시각 이후이고, 반복 시작 시각 이후인 것만
                 if (targetCal.timeInMillis > now && targetCal.timeInMillis >= record.timestamp) {
                     return targetCal.timeInMillis
                 }
@@ -297,12 +342,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // ─── 캘린더 메서드 ────────────────────────────────
-
-    /**
-     * CalendarFragment에서 호출 - 이전/다음 달 이동 시
-     * Room Flow가 연결된 상태에서 월만 바꿔서 다시 collect
-     */
+    // ─── 캘린더 ──────────────────────────────────────
     fun loadCalendarMonth(year: Int, month: Int) {
         calendarLoadJob?.cancel()
 
@@ -325,14 +365,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         Log.d(TAG, "loadCalendarMonth - year=$year, month=${month + 1}")
 
         calendarLoadJob = viewModelScope.launch {
-            // 일반 레코드 + 반복 레코드 동시에 collect
             careRecordRepository.getRecordsByMonth(startOfMonth, endOfMonth)
                 .collect { normalRecords ->
-                    // 반복 레코드는 별도 1회 조회
                     val repeatRecords = careRecordRepository.getRepeatRecordsOnce()
-
                     Log.d(TAG, "일반 기록: ${normalRecords.size}건, 반복 기록: ${repeatRecords.size}건")
-
                     _scheduleMap.value = buildScheduleMap(
                         normalRecords  = normalRecords,
                         repeatRecords  = repeatRecords,
@@ -344,74 +380,64 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
         }
     }
+
     private fun buildScheduleMap(
-        normalRecords  : List<CareRecord>,
-        repeatRecords  : List<CareRecord>,
-        year           : Int,
-        month          : Int,
-        startOfMonth   : Long,
-        endOfMonth     : Long
+        normalRecords : List<CareRecord>,
+        repeatRecords : List<CareRecord>,
+        year          : Int,
+        month         : Int,
+        startOfMonth  : Long,
+        endOfMonth    : Long
     ): Map<Int, List<ScheduleItem>> {
 
         val now        = System.currentTimeMillis()
         val timeFormat = SimpleDateFormat("HH:mm", Locale.KOREA)
         val dayCal     = Calendar.getInstance()
 
-        // 0=월~6=일 → Calendar.DAY_OF_WEEK 매핑
         val dayOfWeekMap = mapOf(
-            0 to Calendar.MONDAY,
-            1 to Calendar.TUESDAY,
-            2 to Calendar.WEDNESDAY,
-            3 to Calendar.THURSDAY,
-            4 to Calendar.FRIDAY,
-            5 to Calendar.SATURDAY,
+            0 to Calendar.MONDAY,    1 to Calendar.TUESDAY,
+            2 to Calendar.WEDNESDAY, 3 to Calendar.THURSDAY,
+            4 to Calendar.FRIDAY,    5 to Calendar.SATURDAY,
             6 to Calendar.SUNDAY
         )
 
         val resultMap = mutableMapOf<Int, MutableList<ScheduleItem>>()
 
-        // ── 일반 레코드 처리 ─────────────────────────────
         normalRecords.forEach { record ->
             dayCal.timeInMillis = record.timestamp
             val day = dayCal.get(Calendar.DAY_OF_MONTH)
             resultMap.getOrPut(day) { mutableListOf() }.add(
                 ScheduleItem(
-                    time   = timeFormat.format(record.timestamp),
-                    label  = buildLabel(record),
-                    isDone = record.timestamp <= now
+                    id       = record.id,
+                    time     = timeFormat.format(record.timestamp),
+                    label    = record.category.displayName,
+                    category = record.category.displayName,
+                    value    = record.value,
+                    memo     = record.memo,
+                    isDone   = record.timestamp <= now,
+                    isRepeat = false,
                 )
             )
         }
 
-        // ── 반복 레코드 동적 펼치기 ──────────────────────
-        // 이번 달의 모든 날짜를 순회하면서 해당 요일 맞으면 추가
         repeatRecords.forEach { record ->
             if (record.repeatDays.isBlank()) return@forEach
 
-            // repeatDays 파싱 (예: "0,2,4" → [0,2,4])
             val repeatDayInts = record.repeatDays.split(",")
                 .mapNotNull { it.trim().toIntOrNull() }
 
-            // Calendar.DAY_OF_WEEK Set으로 변환
             val targetCalendarDays = repeatDayInts
                 .mapNotNull { dayOfWeekMap[it] }
                 .toSet()
 
-            // 기준 시:분 추출
             val baseCal    = Calendar.getInstance().apply { timeInMillis = record.timestamp }
             val baseHour   = baseCal.get(Calendar.HOUR_OF_DAY)
             val baseMinute = baseCal.get(Calendar.MINUTE)
 
-            // 이번 달 1일~말일 순회
-            val iterCal = Calendar.getInstance().apply {
-                timeInMillis = startOfMonth
-            }
+            val iterCal = Calendar.getInstance().apply { timeInMillis = startOfMonth }
 
             while (iterCal.timeInMillis < endOfMonth) {
-                val dayOfWeek = iterCal.get(Calendar.DAY_OF_WEEK)
-
-                if (dayOfWeek in targetCalendarDays) {
-                    // 해당 날짜에 기준 시:분 적용
+                if (iterCal.get(Calendar.DAY_OF_WEEK) in targetCalendarDays) {
                     val targetCal = Calendar.getInstance().apply {
                         timeInMillis = iterCal.timeInMillis
                         set(Calendar.HOUR_OF_DAY, baseHour)
@@ -419,22 +445,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         set(Calendar.SECOND, 0)
                         set(Calendar.MILLISECOND, 0)
                     }
-
                     val targetTimestamp = targetCal.timeInMillis
-
-                    // 반복 시작 기준 시각(record.timestamp) 이후인 날짜만 표시
                     if (targetTimestamp >= record.timestamp) {
                         val day = iterCal.get(Calendar.DAY_OF_MONTH)
                         resultMap.getOrPut(day) { mutableListOf() }.add(
                             ScheduleItem(
-                                time   = timeFormat.format(targetTimestamp),
-                                label  = buildLabel(record),
-                                isDone = targetTimestamp <= now
+                                id       = record.id,
+                                time     = timeFormat.format(targetTimestamp),
+                                label    = record.category.displayName,
+                                category = record.category.displayName,
+                                value    = record.value,
+                                memo     = record.memo,
+                                isDone   = targetTimestamp <= now,
+                                isRepeat = true
                             )
                         )
                     }
                 }
-
                 iterCal.add(Calendar.DAY_OF_MONTH, 1)
             }
         }
@@ -447,6 +474,148 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return if (record.value.isNullOrBlank()) categoryName
         else "$categoryName - ${record.value}"
     }
+
+    // ─── 무드 ────────────────────────────────────────
+    private fun getTodayStartMillis(): Long {
+        return Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+    }
+
+    private fun loadTodayMood() {
+        viewModelScope.launch {
+            try {
+                val existing = userMoodRepository.getByDate(getTodayStartMillis())
+                _todayMood.value = existing?.mood
+                Log.d(TAG, "오늘 무드 로드: ${existing?.mood}")
+            } catch (e: Exception) {
+                Log.e(TAG, "오늘 무드 로드 실패: ${e.message}", e)
+            }
+        }
+    }
+
+    fun loadMonthMoods(year: Int, month: Int) {
+        moodLoadJob?.cancel()
+
+        val startCal = Calendar.getInstance().apply {
+            set(year, month, 1, 0, 0, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        val endCal = Calendar.getInstance().apply {
+            set(year, month, 1, 0, 0, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.MONTH, 1)
+            add(Calendar.MILLISECOND, -1)
+        }
+
+        moodLoadJob = viewModelScope.launch {
+            try {
+                userMoodRepository.getByDateRange(
+                    startMillis = startCal.timeInMillis,
+                    endMillis   = endCal.timeInMillis
+                ).collect { moodList ->
+                    val map    = mutableMapOf<Int, UserMood>()
+                    val dayCal = Calendar.getInstance()
+                    moodList.forEach { mood ->
+                        dayCal.timeInMillis = mood.date
+                        map[dayCal.get(Calendar.DAY_OF_MONTH)] = mood
+                    }
+                    _monthMoodMap.value = map
+                    Log.d(TAG, "월별 무드 로드 완료: ${map.size}건")
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "월별 무드 로드 실패: ${e.message}", e)
+            }
+        }
+    }
+
+    fun saveMood(mood: Mood) {
+        viewModelScope.launch {
+            _moodSaveState.value = MoodSaveState.Loading
+            try {
+                val id = userMoodRepository.insert(mood = mood, date = getTodayStartMillis())
+                _todayMood.value = mood
+                _moodSaveState.value = MoodSaveState.Success
+                Log.d(TAG, "무드 저장 성공 - ID: $id, mood: $mood")
+            } catch (e: Exception) {
+                Log.e(TAG, "무드 저장 실패: ${e.message}", e)
+                _moodSaveState.value = MoodSaveState.Error(e.message ?: "저장 중 오류 발생")
+            }
+        }
+    }
+
+    fun deleteSchedule(id: Long) {
+        viewModelScope.launch {
+            _deleteState.value = DeleteState.Loading
+            try {
+                careRecordRepository.deleteById(id)
+                Log.d(TAG, "일정 삭제 완료 - id: $id")
+
+                // 삭제 후 현재 월 캘린더 새로고침
+                val year  = _calendarYear.value
+                val month = _calendarMonth.value
+                loadCalendarMonth(year, month)
+
+                _deleteState.value = DeleteState.Success
+            } catch (e: Exception) {
+                Log.e(TAG, "일정 삭제 실패 - id: $id, error: ${e.message}", e)
+                _deleteState.value = DeleteState.Error(e.message ?: "삭제 중 오류 발생")
+            }
+        }
+    }
+
+    fun resetDeleteState() {
+        _deleteState.value = DeleteState.Idle
+    }
+
+    fun exportCurrentMonthToPdf() {
+        viewModelScope.launch {
+            _exportState.value = ExportState.Loading
+            try {
+                // 현재 캘린더에 표시 중인 연도/월 기준
+                val year  = _calendarYear.value
+                val month = _calendarMonth.value
+
+                // DB에서 전체 레코드 조회 (반복 포함)
+                // → ReportGenerator 내부에서 이번달 데이터만 필터 + 반복 확장
+                val allRecords = careRecordRepository.getAllOnce()
+
+                Log.d(TAG, "PDF 출력 대상 - ${year}년 ${month + 1}월, 전체 레코드: ${allRecords.size}건")
+
+                if (allRecords.isEmpty()) {
+                    _exportState.value = ExportState.Error("저장된 기록이 없습니다.")
+                    return@launch
+                }
+
+                val file = withContext(Dispatchers.IO) {
+                    reportGenerator.generateMonthlyPDF(
+                        context = getApplication(),
+                        records = allRecords,
+                        year    = year,
+                        month   = month
+                    )
+                }
+
+                if (file != null) {
+                    _exportState.value = ExportState.Success(file)
+                } else {
+                    _exportState.value = ExportState.Error("이번달 기록이 없습니다.")
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "PDF 내보내기 실패: ${e.message}", e)
+                _exportState.value = ExportState.Error(e.message ?: "알 수 없는 오류")
+            }
+        }
+    }
+
+    fun resetExportState() {
+        _exportState.value = ExportState.Idle
+    }
+
     // ─── 정리 ─────────────────────────────────────────
     override fun onCleared() {
         super.onCleared()
@@ -454,5 +623,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         periodicWeatherJob?.cancel()
         countdownJob?.cancel()
         calendarLoadJob?.cancel()
+        moodLoadJob?.cancel()
     }
 }
+
+

@@ -39,6 +39,9 @@ interface CareRecordDao {
     @Query("SELECT * FROM care_records WHERE id = :id")
     suspend fun getById(id: Long): CareRecord?
 
+    @Query("SELECT * FROM care_records ORDER BY timestamp ASC")
+    suspend fun getAllRecords(): List<CareRecord>
+
     // 날짜 범위로 조회 (특정 날 기록 불러올 때 유용)
     @Query("""
         SELECT * FROM care_records 

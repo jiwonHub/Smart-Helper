@@ -33,6 +33,13 @@ class CareRecordActivity : AppCompatActivity() {
         const val EXTRA_TITLE    = "extra_title"
         const val EXTRA_SUBTITLE = "extra_subtitle"
         const val EXTRA_COLOR    = "extra_color"
+        const val EXTRA_RECORD_ID = "extra_record_id"
+        const val EXTRA_IS_EDIT   = "extra_is_edit"
+        const val EXTRA_VALUE     = "extra_value"
+        const val EXTRA_MEMO      = "extra_memo"
+        const val EXTRA_TIMESTAMP = "extra_timestamp"
+        const val EXTRA_IS_REPEAT = "extra_is_repeat"
+        const val EXTRA_REPEAT_DAYS = "extra_repeat_days"
 
         // CareCategory.name 기준으로 통일
         const val CATEGORY_MEDICATION   = "MEDICATION"
@@ -55,6 +62,9 @@ class CareRecordActivity : AppCompatActivity() {
 
     private val calendar = Calendar.getInstance()
     private var currentCategory = CATEGORY_OTHER
+
+    private var isEditMode = false
+    private var recordId   = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -151,12 +161,20 @@ class CareRecordActivity : AppCompatActivity() {
         val color    = intent.getStringExtra(EXTRA_COLOR)    ?: "#4A90D9"
         currentCategory = intent.getStringExtra(EXTRA_CATEGORY) ?: CATEGORY_OTHER
 
-        binding.tvHeaderTitle.text    = title
-        binding.tvHeaderSubtitle.text = subtitle
+        isEditMode = intent.getBooleanExtra(EXTRA_IS_EDIT, false)
+        recordId   = intent.getLongExtra(EXTRA_RECORD_ID, -1L)
 
-        // SharedPreferences 기반 기본값 적용
-        val defaultValue = viewModel.getDefaultValue(this, currentCategory)
-        binding.etValue.setText(defaultValue)
+        if (isEditMode) {
+            binding.tvHeaderTitle.text = "$title 수정"
+            binding.btnSave.text = "수정하기"
+            loadEditData()
+        } else {
+            binding.tvHeaderTitle.text = title
+            val defaultValue = viewModel.getDefaultValue(this, currentCategory)
+            binding.etValue.setText(defaultValue)
+        }
+
+        binding.tvHeaderSubtitle.text = subtitle
 
         binding.btnSearchHistory.setOnClickListener {
             showValueHistoryDialog()
@@ -164,13 +182,15 @@ class CareRecordActivity : AppCompatActivity() {
 
         val parsedColor = Color.parseColor(color)
         categoryColor = parsedColor
-        binding.headerBackground.background         = ColorDrawable(parsedColor)
+
+        // ★ 색상 테마 적용 (중복 제거)
+        binding.headerBackground.background = ColorDrawable(parsedColor)
         binding.accentBarDateTime.setBackgroundColor(parsedColor)
         binding.accentBarDetail.setBackgroundColor(parsedColor)
         binding.accentBarMemo.setBackgroundColor(parsedColor)
-        binding.btnSave.backgroundTintList          = ColorStateList.valueOf(parsedColor)
+        binding.btnSave.backgroundTintList = ColorStateList.valueOf(parsedColor)
 
-        // 스위치 track 컬러 동적 적용
+        // 스위치 색상 (기존 그대로 유지)
         val trackStates = arrayOf(
             intArrayOf(android.R.attr.state_checked),
             intArrayOf(-android.R.attr.state_checked)
@@ -181,18 +201,17 @@ class CareRecordActivity : AppCompatActivity() {
         )
         binding.switchRepeat.trackTintList = ColorStateList(trackStates, trackColors)
 
-        // 스위치 thumb 컬러 (ON 상태에서 살짝 투명하게 카테고리 컬러 반영)
         val thumbStates = arrayOf(
             intArrayOf(android.R.attr.state_checked),
             intArrayOf(-android.R.attr.state_checked)
         )
         val thumbColors = intArrayOf(
-            Color.parseColor("#000000"),
-            Color.parseColor("#000000")
+            Color.parseColor("#000000"), // 기존 검은색 유지
+            Color.parseColor("#000000")  // 기존 검은색 유지
         )
         binding.switchRepeat.thumbTintList = ColorStateList(thumbStates, thumbColors)
 
-        // CareCategory.name 기준으로 아이콘 매핑
+        // 아이콘 설정
         val iconRes = when (currentCategory) {
             CATEGORY_MEDICATION  -> R.drawable.pills
             CATEGORY_SLEEP       -> R.drawable.bed
@@ -226,25 +245,48 @@ class CareRecordActivity : AppCompatActivity() {
 
             val timestamp = calendar.timeInMillis
 
-            if (isRepeat) {
-                viewModel.saveRepeatRecord(
-                    baseTimestamp  = timestamp,
-                    category       = currentCategory,
-                    value          = value,
-                    memo           = memo,
-                    repeatDaysList = selectedDays.sorted()
-                )
+            if (isEditMode) {
+                // ★ 수정 모드
+                if (isRepeat) {
+                    viewModel.updateRepeatRecord(
+                        id             = recordId,
+                        baseTimestamp  = timestamp,
+                        category       = currentCategory,
+                        value          = value,
+                        memo           = memo,
+                        repeatDaysList = selectedDays.sorted()
+                    )
+                } else {
+                    viewModel.updateRecord(
+                        id        = recordId,
+                        timestamp = timestamp,
+                        category  = currentCategory,
+                        value     = value,
+                        memo      = memo
+                    )
+                }
             } else {
-                viewModel.saveRecord(
-                    timestamp = timestamp,
-                    category  = currentCategory,
-                    value     = value,
-                    memo      = memo
-                )
+                // 기존 저장 로직
+                if (isRepeat) {
+                    viewModel.saveRepeatRecord(
+                        baseTimestamp  = timestamp,
+                        category       = currentCategory,
+                        value          = value,
+                        memo           = memo,
+                        repeatDaysList = selectedDays.sorted()
+                    )
+                } else {
+                    viewModel.saveRecord(
+                        timestamp = timestamp,
+                        category  = currentCategory,
+                        value     = value,
+                        memo      = memo
+                    )
+                }
             }
         }
-    }
 
+    }
 
     private fun setupRepeatSwitch() {
         binding.switchRepeat.setOnCheckedChangeListener { _, isChecked ->
@@ -293,6 +335,88 @@ class CareRecordActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadEditData() {
+        val value      = intent.getStringExtra(EXTRA_VALUE) ?: ""
+        val memo       = intent.getStringExtra(EXTRA_MEMO) ?: ""
+        val timestamp  = intent.getLongExtra(EXTRA_TIMESTAMP, System.currentTimeMillis())
+        val isRepeat   = intent.getBooleanExtra(EXTRA_IS_REPEAT, false)
+        val repeatDays = intent.getStringExtra(EXTRA_REPEAT_DAYS) ?: ""
+
+        Log.d(TAG, "수정 모드 데이터 로드 - isRepeat: $isRepeat, repeatDays: '$repeatDays'")
+
+        // 값과 메모 설정
+        binding.etValue.setText(value)
+        binding.etMemo.setText(memo)
+
+        // 시간 설정
+        calendar.timeInMillis = timestamp
+        updateDateDisplay()
+        updateTimeDisplay()
+        setupSwitchForEditMode(isRepeat, repeatDays)
+    }
+
+    private fun setupSwitchForEditMode(isRepeat: Boolean, repeatDays: String) {
+        Log.d(TAG, "스위치 설정 시작 - isRepeat: $isRepeat, repeatDays: '$repeatDays'")
+
+        // ★ 1단계: 리스너 제거
+        binding.switchRepeat.setOnCheckedChangeListener(null)
+
+        // ★ 2단계: 무조건 OFF로 시작
+        binding.switchRepeat.isChecked = false
+        binding.viewFlipperDate.displayedChild = 0
+
+        // ★ 3단계: 요일 데이터 복원 (백그라운드에서)
+        selectedDays.clear()
+        resetAllDayButtons()
+
+        if (isRepeat && repeatDays.isNotEmpty()) {
+            Log.d(TAG, "요일 데이터 복원 시작 - repeatDays: '$repeatDays'")
+            val dayIndices = repeatDays.split(",").mapNotNull { it.trim().toIntOrNull() }
+            selectedDays.addAll(dayIndices)
+
+            val dayViews = listOf(
+                binding.dayMon, binding.dayTue, binding.dayWed,
+                binding.dayThu, binding.dayFri, binding.daySat, binding.daySun
+            )
+
+            dayIndices.forEach { index ->
+                if (index in 0..6) {
+                    setDaySelected(dayViews[index], index)
+                    Log.d(TAG, "요일 버튼 복원 완료 - index: $index")
+                }
+            }
+        }
+
+        // ★ 4단계: 리스너 재등록
+        binding.switchRepeat.setOnCheckedChangeListener { _, checked ->
+            if (checked) {
+                binding.viewFlipperDate.apply {
+                    inAnimation = AnimationUtils.loadAnimation(context, android.R.anim.fade_in)
+                    outAnimation = AnimationUtils.loadAnimation(context, android.R.anim.fade_out)
+                    displayedChild = 1
+                }
+            } else {
+                binding.viewFlipperDate.apply {
+                    inAnimation = AnimationUtils.loadAnimation(context, android.R.anim.fade_in)
+                    outAnimation = AnimationUtils.loadAnimation(context, android.R.anim.fade_out)
+                    displayedChild = 0
+                }
+                selectedDays.clear()
+                resetAllDayButtons()
+            }
+        }
+
+        // ★ 5단계: 반복 일정이면 0.5초 후에 스위치 ON
+        if (isRepeat) {
+            binding.switchRepeat.postDelayed({
+                Log.d(TAG, "0.5초 후 스위치 ON 실행")
+                binding.switchRepeat.isChecked = true
+                // ViewFlipper는 리스너에서 자동 처리됨
+            }, 500)
+        }
+
+        Log.d(TAG, "스위치 설정 완료 - 초기 상태: OFF, 반복여부: $isRepeat")
+    }
     private fun setDaySelected(view: TextView, index: Int) {
         // 배경 카테고리 컬러로 채우기
         val bg = GradientDrawable().apply {

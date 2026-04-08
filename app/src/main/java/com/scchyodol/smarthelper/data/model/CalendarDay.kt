@@ -17,5 +17,6 @@ data class ScheduleItem(
     val value   : String? = null,
     val memo    : String? = null,
     val isDone: Boolean,
-    val isRepeat : Boolean = false
+    val isRepeat : Boolean = false,
+    val repeatDays: String = ""
 )

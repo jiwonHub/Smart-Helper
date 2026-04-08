@@ -74,6 +74,13 @@ class SelfCareFragment : Fragment() {
                         if (mood != null) {
                             val (card, label) = moodCardMap[mood] ?: return@collect
                             selectMood(card, label)
+                        } else {
+                            // ★ 오늘 무드가 없으면 NORMAL을 디폴트로 저장
+                            Log.d(TAG, "오늘 무드 없음 → NORMAL 디폴트 저장")
+                            val defaultMood = Mood.NORMAL
+                            val (card, label) = moodCardMap[defaultMood] ?: return@collect
+                            selectMood(card, label)
+                            viewModel.saveMood(defaultMood)
                         }
                     }
                 }
@@ -91,9 +98,16 @@ class SelfCareFragment : Fragment() {
                 launch {
                     viewModel.moodSaveState.collect { state ->
                         when (state) {
-                            is MoodSaveState.Error ->
-                                Toast.makeText(requireContext(), "저장 실패: ${state.message}", Toast.LENGTH_SHORT).show()
-                            else -> Unit
+                            is MoodSaveState.Loading -> {
+                                Log.d(TAG, "무드 저장 중...")
+                            }
+                            is MoodSaveState.Success -> {
+                                Log.d(TAG, "무드 저장 성공!")
+                            }
+                            is MoodSaveState.Error -> {
+                                Log.e(TAG, "무드 저장 실패: ${state.message}")
+                            }
+                            is MoodSaveState.Idle -> Unit
                         }
                     }
                 }

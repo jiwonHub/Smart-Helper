@@ -177,10 +177,10 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:thumb="@drawable/switch_thumb_bg"
-                            app:track="@drawable/switch_track"
+                            app:showText="false"
                             app:switchMinWidth="52dp"
                             app:switchPadding="4dp"
-                            app:showText="false"/>
+                            app:track="@drawable/switch_track" />
 
                     </LinearLayout>
 

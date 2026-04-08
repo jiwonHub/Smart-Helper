@@ -416,6 +416,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     memo     = record.memo,
                     isDone   = record.timestamp <= now,
                     isRepeat = false,
+                    repeatDays = ""
                 )
             )
         }
@@ -457,7 +458,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                                 value    = record.value,
                                 memo     = record.memo,
                                 isDone   = targetTimestamp <= now,
-                                isRepeat = true
+                                isRepeat = true,
+                                repeatDays = record.repeatDays
                             )
                         )
                     }
@@ -511,20 +513,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             add(Calendar.MILLISECOND, -1)
         }
 
+        val fmt = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
+        Log.d(TAG, "=== 월별 무드 로드 시작 ===")
+        Log.d(TAG, "연도: $year, 월: ${month + 1}")
+        Log.d(TAG, "범위: ${fmt.format(startCal.timeInMillis)} ~ ${fmt.format(endCal.timeInMillis)}")
+
         moodLoadJob = viewModelScope.launch {
             try {
                 userMoodRepository.getByDateRange(
                     startMillis = startCal.timeInMillis,
                     endMillis   = endCal.timeInMillis
                 ).collect { moodList ->
-                    val map    = mutableMapOf<Int, UserMood>()
+                    Log.d(TAG, "DB에서 가져온 무드 데이터: ${moodList.size}건")
+                    moodList.forEachIndexed { index, mood ->
+                        val cal = Calendar.getInstance().apply { timeInMillis = mood.date }
+                        Log.d(TAG, "[$index] ${cal.get(Calendar.DAY_OF_MONTH)}일 - ${mood.mood}")
+                    }
+
+                    val map = mutableMapOf<Int, UserMood>()
                     val dayCal = Calendar.getInstance()
                     moodList.forEach { mood ->
                         dayCal.timeInMillis = mood.date
-                        map[dayCal.get(Calendar.DAY_OF_MONTH)] = mood
+                        val day = dayCal.get(Calendar.DAY_OF_MONTH)
+                        map[day] = mood
+                        Log.d(TAG, "맵에 추가: ${day}일 → ${mood.mood}")
                     }
+
                     _monthMoodMap.value = map
-                    Log.d(TAG, "월별 무드 로드 완료: ${map.size}건")
+                    Log.d(TAG, "최종 월별 무드 맵: ${map.size}건")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "월별 무드 로드 실패: ${e.message}", e)
@@ -532,14 +548,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+
     fun saveMood(mood: Mood) {
         viewModelScope.launch {
             _moodSaveState.value = MoodSaveState.Loading
             try {
+                val todayMillis = getTodayStartMillis()
                 val id = userMoodRepository.insert(mood = mood, date = getTodayStartMillis())
                 _todayMood.value = mood
                 _moodSaveState.value = MoodSaveState.Success
                 Log.d(TAG, "무드 저장 성공 - ID: $id, mood: $mood")
+                val cal = Calendar.getInstance().apply { timeInMillis = todayMillis }
+                loadMonthMoods(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH))
             } catch (e: Exception) {
                 Log.e(TAG, "무드 저장 실패: ${e.message}", e)
                 _moodSaveState.value = MoodSaveState.Error(e.message ?: "저장 중 오류 발생")

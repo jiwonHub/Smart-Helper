@@ -1,5 +1,6 @@
 package com.scchyodol.smarthelper.presentation.home.fragment.calendar
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,8 +19,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.scchyodol.smarthelper.R
 import com.scchyodol.smarthelper.data.model.CalendarDay
+import com.scchyodol.smarthelper.data.model.CategoryInfo
 import com.scchyodol.smarthelper.data.model.ScheduleItem
 import com.scchyodol.smarthelper.databinding.FragmentCalendarBinding
+import com.scchyodol.smarthelper.presentation.home.carerecord.CareRecordActivity
 import com.scchyodol.smarthelper.presentation.home.main.DeleteState
 import com.scchyodol.smarthelper.presentation.home.main.ExportState
 import com.scchyodol.smarthelper.presentation.home.main.MainViewModel
@@ -339,9 +342,15 @@ class CalendarFragment : Fragment() {
             rv.visibility    = View.VISIBLE
             empty.visibility = View.GONE
             rv.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
-            rv.adapter       = ScheduleDetailAdapter(schedules) { item, _ ->
-                showDeleteDialog(item)
-            }
+            rv.adapter = ScheduleDetailAdapter(
+                schedules,
+                onEditClick = { item, _ ->    // ← 수정 콜백
+                    showEditDialog(item, "일정 수정", "${item.label} 일정을 수정하시겠습니까?")
+                },
+                onDeleteClick = { item, _ ->  // ← 삭제 콜백
+                    showDeleteDialog(item)
+                }
+            )
         }
 
         // 닫기 버튼들
@@ -360,6 +369,72 @@ class CalendarFragment : Fragment() {
         }
 
         dialog.show()
+    }
+
+    private fun openEditActivity(item: ScheduleItem) {
+        val intent = Intent(requireContext(), CareRecordActivity::class.java).apply {
+            // 카테고리별 정보 설정
+            val (title, subtitle, color, category) = getCategoryInfo(item.category)
+
+            putExtra(CareRecordActivity.EXTRA_CATEGORY, category)
+            putExtra(CareRecordActivity.EXTRA_TITLE, title)
+            putExtra(CareRecordActivity.EXTRA_SUBTITLE, subtitle)
+            putExtra(CareRecordActivity.EXTRA_COLOR, color)
+
+            // 수정 모드 데이터
+            putExtra(CareRecordActivity.EXTRA_IS_EDIT, true)
+            putExtra(CareRecordActivity.EXTRA_RECORD_ID, item.id)
+            putExtra(CareRecordActivity.EXTRA_VALUE, item.value)
+            putExtra(CareRecordActivity.EXTRA_MEMO, item.memo)
+
+            // 시간 복원 (item.time을 timestamp로 변환)
+            val timestamp = parseTimeToTimestamp(item.time, selectedDay)
+            putExtra(CareRecordActivity.EXTRA_TIMESTAMP, timestamp)
+
+            putExtra(CareRecordActivity.EXTRA_IS_REPEAT, item.isRepeat)
+            putExtra(CareRecordActivity.EXTRA_REPEAT_DAYS, item.repeatDays)
+        }
+
+        startActivity(intent)
+        currentDetailDialog?.dismiss()
+        currentDetailDialog = null
+    }
+
+    private fun getCategoryInfo(category: String): CategoryInfo {
+        return when (category.uppercase()) {
+            "투약", "MEDICATION" -> CategoryInfo(
+                "투약", "Medication", "#4A90D9", CareRecordActivity.CATEGORY_MEDICATION
+            )
+            "수면", "SLEEP" -> CategoryInfo(
+                "수면", "Sleep", "#7B52D3", CareRecordActivity.CATEGORY_SLEEP
+            )
+            "식사", "MEAL" -> CategoryInfo(
+                "식사", "Meal", "#F5A623", CareRecordActivity.CATEGORY_MEAL
+            )
+            "배변", "EXCRETION" -> CategoryInfo(
+                "배변", "Excretion", "#4CAF82", CareRecordActivity.CATEGORY_EXCRETION
+            )
+            "체온", "TEMPERATURE" -> CategoryInfo(
+                "체온", "Temperature", "#E84C4C", CareRecordActivity.CATEGORY_TEMPERATURE
+            )
+            else -> CategoryInfo(
+                "기타", "Other", "#26A69A", CareRecordActivity.CATEGORY_OTHER
+            )
+        }
+    }
+
+    private fun parseTimeToTimestamp(timeStr: String, day: Int): Long {
+        val year  = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+
+        val timeParts = timeStr.split(":")
+        val hour      = timeParts[0].toInt()
+        val minute    = timeParts[1].toInt()
+
+        return Calendar.getInstance().apply {
+            set(year, month, day, hour, minute, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
     }
 
     // ── PDF 열기 확인 팝업 ────────────────────────────────────────
@@ -391,6 +466,17 @@ class CalendarFragment : Fragment() {
         } else {
             showDeleteDialog(item, "일정 삭제", "'${item.label}' 일정을 삭제하시겠습니까?")
         }
+    }
+
+    private fun showEditDialog(item: ScheduleItem, title: String, description: String) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(title)
+            .setMessage(description)
+            .setPositiveButton("확인") { _, _ ->
+                openEditActivity(item)
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 
     private fun showDeleteDialog(item: ScheduleItem, title: String, description: String) {

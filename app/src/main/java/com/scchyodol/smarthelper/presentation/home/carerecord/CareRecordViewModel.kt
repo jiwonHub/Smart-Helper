@@ -113,6 +113,82 @@ class CareRecordViewModel(
         }
     }
 
+    fun updateRecord(
+        id        : Long,
+        timestamp : Long,
+        category  : String,
+        value     : String,
+        memo      : String
+    ) {
+        val careCategory = toCareCategory(category)
+        val record = CareRecord(
+            id        = id,
+            timestamp = timestamp,
+            category  = careCategory,
+            value     = value,
+            memo      = memo,
+            isRepeat  = false,
+            repeatDays = ""
+        )
+
+        Log.d(TAG, "=== 일반 기록 수정 ===")
+        Log.d(TAG, "id: $id, category: $careCategory, value: '$value'")
+
+        viewModelScope.launch {
+            _saveState.value = SaveState.Loading
+            try {
+                val updatedId = repository.insert(record) // Room @Insert에서 REPLACE 정책
+                Log.d(TAG, "수정 완료 - ID: $updatedId")
+                _saveState.value = SaveState.Success(updatedId)
+            } catch (e: Exception) {
+                Log.e(TAG, "수정 실패: ${e.message}", e)
+                _saveState.value = SaveState.Error(e.message ?: "수정 중 오류 발생")
+            }
+        }
+    }
+
+    fun updateRepeatRecord(
+        id             : Long,
+        baseTimestamp  : Long,
+        category       : String,
+        value          : String,
+        memo           : String,
+        repeatDaysList : List<Int>
+    ) {
+        if (repeatDaysList.isEmpty()) {
+            _saveState.value = SaveState.Error("반복할 요일을 선택해주세요.")
+            return
+        }
+
+        val careCategory  = toCareCategory(category)
+        val repeatDaysStr = repeatDaysList.sorted().joinToString(",")
+
+        val record = CareRecord(
+            id         = id,
+            timestamp  = baseTimestamp,
+            category   = careCategory,
+            value      = value,
+            memo       = memo,
+            isRepeat   = true,
+            repeatDays = repeatDaysStr
+        )
+
+        Log.d(TAG, "=== 반복 기록 수정 ===")
+        Log.d(TAG, "id: $id, repeatDays: $repeatDaysStr")
+
+        viewModelScope.launch {
+            _saveState.value = SaveState.Loading
+            try {
+                val updatedId = repository.insert(record)
+                Log.d(TAG, "반복 수정 완료 - ID: $updatedId")
+                _saveState.value = SaveState.Success(updatedId)
+            } catch (e: Exception) {
+                Log.e(TAG, "반복 수정 실패: ${e.message}", e)
+                _saveState.value = SaveState.Error(e.message ?: "수정 중 오류 발생")
+            }
+        }
+    }
+
     // ─── 공통 유틸 ─────────────────────────────────────
     private fun toCareCategory(category: String): CareCategory {
         return runCatching {

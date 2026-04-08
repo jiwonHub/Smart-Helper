@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="320dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/dialog_bg_rounded"
+    android:padding="24dp">
+
+    <!-- 상단 아이콘 + 제목 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/ivReminderIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/notification"
+            android:layout_marginEnd="12dp"
+            app:tint="@color/primary_blue" />
+
+        <TextView
+            android:id="@+id/tvReminderTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="일정 알림"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+    </LinearLayout>
+
+    <!-- 시간 표시 카드 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/card_time_bg"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/tvReminderTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="4월 8일 오후 2:30"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_blue"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/tvReminderCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="투약"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:gravity="center"
+            android:layout_marginTop="4dp" />
+
+    </LinearLayout>
+
+    <!-- 메시지 -->
+    <TextView
+        android:id="@+id/tvReminderMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="일정이 10분 후에 시작됩니다."
+        android:textSize="15sp"
+        android:textColor="@color/text_primary"
+        android:gravity="center"
+        android:lineSpacingExtra="2dp"
+        android:layout_marginBottom="4dp" />
+
+    <!-- 수치 (있을 때만) -->
+    <TextView
+        android:id="@+id/tvReminderValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="수치: 50mg"
+        android:textSize="13sp"
+        android:textColor="@color/text_hint"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone" />
+
+    <!-- 10분 전 버튼 (확인만) -->
+    <Button
+        android:id="@+id/btnReminderConfirm"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="확인"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:background="@drawable/btn_primary_rounded"
+        android:visibility="gone" />
+
+    <!-- 정시 버튼들 (수행/미수행) -->
+    <LinearLayout
+        android:id="@+id/layoutActionButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <Button
+            android:id="@+id/btnNotDone"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:text="미수행"
+            android:textSize="15sp"
+            android:textColor="@color/text_secondary"
+            android:background="@drawable/btn_secondary_rounded"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/btnDone"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:text="수행 완료"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:background="@drawable/btn_success_rounded"
+            android:layout_marginStart="8dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

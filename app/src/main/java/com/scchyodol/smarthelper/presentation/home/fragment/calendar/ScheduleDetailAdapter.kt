@@ -11,6 +11,7 @@ import com.scchyodol.smarthelper.data.model.ScheduleItem
 
 class ScheduleDetailAdapter(
     private var items: List<ScheduleItem>,
+    private val onEditClick: (ScheduleItem, Int) -> Unit,
     private val onDeleteClick: (ScheduleItem, Int) -> Unit
 ) : RecyclerView.Adapter<ScheduleDetailAdapter.DetailViewHolder>() {
 
@@ -23,6 +24,7 @@ class ScheduleDetailAdapter(
         val tvLabel    : TextView = itemView.findViewById(R.id.tvDetailLabel)
         val tvValue    : TextView = itemView.findViewById(R.id.tvDetailValue)
         val tvMemo     : TextView = itemView.findViewById(R.id.tvDetailMemo)
+        val btnEdit   : ImageView = itemView.findViewById(R.id.btnEditDetail)
         val btnDelete  : ImageView = itemView.findViewById(R.id.btnDeleteDetail)
     }
 
@@ -76,6 +78,10 @@ class ScheduleDetailAdapter(
             holder.tvDoneTag.setTextColor(android.graphics.Color.parseColor("#F39C12"))
             holder.tvDoneTag.setBackgroundResource(R.drawable.bg_pending_tag)
             holder.colorBar.setBackgroundResource(R.drawable.bg_schedule_bar_pending)
+        }
+
+        holder.btnEdit.setOnClickListener {
+            onEditClick(item, holder.adapterPosition)
         }
 
         // 삭제 버튼

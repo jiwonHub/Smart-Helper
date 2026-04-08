@@ -45,6 +45,10 @@ class CareRecordRepository(
     fun getByCategory(category: String): Flow<List<CareRecord>> =
         dao.getByCategory(category)
 
+    suspend fun getAllRecords(): List<CareRecord> {
+        return dao.getAllRecords()
+    }
+
     // ── 카테고리별 수치 히스토리 ──
     fun getValueHistoryByCategory(category: CareCategory): Flow<List<String>> {
         Log.d(TAG, "getValueHistoryByCategory 호출 - category: '${category.name}'")

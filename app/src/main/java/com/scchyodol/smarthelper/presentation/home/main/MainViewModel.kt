@@ -1,12 +1,14 @@
 package com.scchyodol.smarthelper.presentation.home.main
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.scchyodol.smarthelper.alarm.AlarmScheduler
 import com.scchyodol.smarthelper.data.db.AppDatabase
 import com.scchyodol.smarthelper.data.model.CareRecord
 import com.scchyodol.smarthelper.data.model.Mood
@@ -24,6 +26,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -91,7 +94,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _nextTask = MutableStateFlow<CareRecord?>(null)
     val nextTask: StateFlow<CareRecord?> = _nextTask
 
-    private val _countdown = MutableStateFlow<String>("--")
+    private val _countdown = MutableStateFlow<String>("✏️ 새로운 일정을 등록해주세요!")
     val countdown: StateFlow<String> = _countdown
 
     private var countdownJob: Job? = null
@@ -137,6 +140,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadTodayMood()
         val now = Calendar.getInstance()
         loadMonthMoods(now.get(Calendar.YEAR), now.get(Calendar.MONTH))
+    }
+
+    fun scheduleNearestReminder(context: Context) {
+        viewModelScope.launch {
+            val records = careRecordRepository.getAllRecords()
+            AlarmScheduler.scheduleNearest(context, records)
+        }
     }
 
     // ─── 유저 ────────────────────────────────────────
@@ -572,6 +582,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _deleteState.value = DeleteState.Loading
             try {
                 careRecordRepository.deleteById(id)
+                careRecordRepository.rescheduleReminder()
                 Log.d(TAG, "일정 삭제 완료 - id: $id")
 
                 // 삭제 후 현재 월 캘린더 새로고침

@@ -15,7 +15,6 @@ interface CareRecordDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(record: CareRecord): Long
 
-
     // 특정 레코드 삭제
     @Delete
     suspend fun delete(record: CareRecord)

@@ -1,14 +1,14 @@
 package com.scchyodol.smarthelper.data.remote.repository
 
 import android.util.Log
+import com.scchyodol.smarthelper.SmartHelperApplication
+import com.scchyodol.smarthelper.alarm.AlarmScheduler
 import com.scchyodol.smarthelper.data.dao.CareRecordDao
 import com.scchyodol.smarthelper.data.model.CareCategory
 import com.scchyodol.smarthelper.data.model.CareRecord
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 class CareRecordRepository(
@@ -22,6 +22,7 @@ class CareRecordRepository(
     // ── 저장 ──
     suspend fun insert(record: CareRecord): Long {
         val id = dao.insert(record)
+        rescheduleReminder()
         Log.d(TAG, "DB 저장 완료 - id: $id, category: ${record.category}, value: ${record.value}, isRepeat: ${record.isRepeat}, repeatDays: ${record.repeatDays}")
         return id
     }
@@ -30,7 +31,10 @@ class CareRecordRepository(
     suspend fun delete(record: CareRecord) = dao.delete(record)
 
     // ── id로 삭제 ──
-    suspend fun deleteById(id: Long) = dao.deleteById(id)
+    suspend fun deleteById(id: Long) {
+        dao.deleteById(id)
+        rescheduleReminder()
+    }
 
     // ── 전체 삭제 ──
     suspend fun deleteAll() = dao.deleteAll()
@@ -86,5 +90,33 @@ class CareRecordRepository(
 
     suspend fun getAllOnce(): List<CareRecord> = dao.getAllOnce()
 
+    suspend fun rescheduleReminder() {
+        rescheduleReminders()
+    }
+
+
+    private suspend fun rescheduleReminders() {
+        Log.d(TAG, "=== rescheduleReminders 시작 ===")
+
+        try {
+            // 모든 기존 알림 취소 후 새로 계산해서 등록
+            val context = SmartHelperApplication.getAppContext()
+            val allRecords = getAllRecords()
+
+            Log.d(TAG, "Context: $context")
+            Log.d(TAG, "전체 레코드 수: ${allRecords.size}")
+
+            // 기존 알림 모두 취소
+            AlarmScheduler.cancelAllAlarms(context)
+
+            // 새로운 가장 가까운 일정으로 재등록
+            AlarmScheduler.scheduleNearest(context, allRecords)
+
+            Log.d(TAG, "=== rescheduleReminders 완료 ===")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "❌ rescheduleReminders 실패: ${e.message}", e)
+        }
+    }
 
 }

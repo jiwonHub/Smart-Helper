@@ -12,6 +12,7 @@ import com.scchyodol.smarthelper.data.remote.repository.CareRecordRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 class CareRecordViewModel(
@@ -40,9 +41,15 @@ class CareRecordViewModel(
         value     : String,
         memo      : String
     ) {
+        val adjustedTimestamp = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
         val careCategory = toCareCategory(category)
         val record = CareRecord(
-            timestamp = timestamp,
+            timestamp = adjustedTimestamp,
             category  = careCategory,
             value     = value,
             memo      = memo,
@@ -83,13 +90,19 @@ class CareRecordViewModel(
             return
         }
 
+        val adjustedTimestamp = Calendar.getInstance().apply {
+            timeInMillis = baseTimestamp
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
         val careCategory  = toCareCategory(category)
         val repeatDaysStr = repeatDaysList.sorted().joinToString(",")
 
         // 레코드 1건만 저장
         // timestamp = 반복 시작 기준 시각 (이 시각 이후의 해당 요일에만 표시)
         val record = CareRecord(
-            timestamp  = baseTimestamp,
+            timestamp  = adjustedTimestamp,
             category   = careCategory,
             value      = value,
             memo       = memo,

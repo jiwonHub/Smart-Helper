@@ -215,60 +215,107 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // ─── 다음 할 일 ──────────────────────────────────
     private fun loadNextTask() {
         viewModelScope.launch {
-            try {
-                careRecordRepository.getAll().collect { records ->
-                    val now = System.currentTimeMillis()
+            careRecordRepository.getAll().collect { records ->
+                val now = System.currentTimeMillis()
 
-                    val nextNormal = records
-                        .filter { !it.isRepeat && it.timestamp > now }
-                        .minByOrNull { it.timestamp }
+                records.forEachIndexed { index, record ->
+                    val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA)
+                    Log.d(
+                        "COUNTDOWN_DEBUG", "레코드[$index]: " +
+                                "timestamp=${record.timestamp}(${fmt.format(record.timestamp)}), " +
+                                "isRepeat=${record.isRepeat}, " +
+                                "repeatDays='${record.repeatDays}', " +
+                                "미래여부=${record.timestamp > now}"
+                    )
+                }
 
-                    val nextRepeatPair = records
-                        .filter { it.isRepeat && it.repeatDays.isNotBlank() }
-                        .mapNotNull { record ->
-                            val nextOccurrence = getNextOccurrence(record, now)
-                            if (nextOccurrence != null) Pair(record, nextOccurrence) else null
-                        }
-                        .minByOrNull { it.second }
+                Log.d("COUNTDOWN_DEBUG", "=== loadNextTask 시작 ===")
+                Log.d("COUNTDOWN_DEBUG", "전체 레코드 수: ${records.size}")
+                Log.d("COUNTDOWN_DEBUG", "현재 시각(now): $now")
 
-                    val next: CareRecord?
-                    val nextTimestamp: Long
+                val nextNormal = records
+                    .filter { !it.isRepeat && it.timestamp > now }
+                    .minByOrNull { it.timestamp }
+                    ?.let { record ->
+                        val adjustedTime = Calendar.getInstance().apply {
+                            timeInMillis = record.timestamp
+                            set(Calendar.SECOND, 0)
+                            set(Calendar.MILLISECOND, 0)
+                        }.timeInMillis
+                        Log.d("COUNTDOWN_DEBUG", "일반 태스크 원본 timestamp: ${record.timestamp}")
+                        Log.d("COUNTDOWN_DEBUG", "일반 태스크 조정 timestamp: $adjustedTime")
+                        record.copy(timestamp = adjustedTime)
+                    }
 
-                    when {
-                        nextNormal == null && nextRepeatPair == null -> {
-                            next          = null
-                            nextTimestamp = 0L
-                        }
-                        nextNormal == null -> {
-                            next          = nextRepeatPair!!.first.copy(timestamp = nextRepeatPair.second)
+                Log.d(
+                    "COUNTDOWN_DEBUG",
+                    "nextNormal: ${nextNormal?.category?.displayName} / ${nextNormal?.timestamp}"
+                )
+
+                val nextRepeatPair = records
+                    .filter { it.isRepeat && it.repeatDays.isNotBlank() }
+                    .mapNotNull { record ->
+                        val nextOccurrence = getNextOccurrence(record, now)
+                        Log.d(
+                            "COUNTDOWN_DEBUG",
+                            "반복 태스크 [${record.category.displayName}] nextOccurrence: $nextOccurrence"
+                        )
+                        if (nextOccurrence != null) Pair(record, nextOccurrence) else null
+                    }
+                    .minByOrNull { it.second }
+
+                Log.d(
+                    "COUNTDOWN_DEBUG",
+                    "nextRepeatPair: ${nextRepeatPair?.first?.category?.displayName} / ${nextRepeatPair?.second}"
+                )
+
+                val next: CareRecord?
+                val nextTimestamp: Long
+
+                when {
+                    nextNormal == null && nextRepeatPair == null -> {
+                        Log.d("COUNTDOWN_DEBUG", "결과: 다음 태스크 없음")
+                        next = null
+                        nextTimestamp = 0L
+                    }
+
+                    nextNormal == null -> {
+                        Log.d("COUNTDOWN_DEBUG", "결과: 반복 태스크 선택")
+                        next = nextRepeatPair!!.first.copy(timestamp = nextRepeatPair.second)
+                        nextTimestamp = nextRepeatPair.second
+                    }
+
+                    nextRepeatPair == null -> {
+                        Log.d("COUNTDOWN_DEBUG", "결과: 일반 태스크 선택")
+                        next = nextNormal
+                        nextTimestamp = nextNormal.timestamp
+                    }
+
+                    else -> {
+                        if (nextNormal.timestamp <= nextRepeatPair.second) {
+                            Log.d("COUNTDOWN_DEBUG", "결과: 일반 vs 반복 비교 -> 일반 선택")
+                            next = nextNormal
+                            nextTimestamp = nextNormal.timestamp
+                        } else {
+                            Log.d("COUNTDOWN_DEBUG", "결과: 일반 vs 반복 비교 -> 반복 선택")
+                            next = nextRepeatPair.first.copy(timestamp = nextRepeatPair.second)
                             nextTimestamp = nextRepeatPair.second
                         }
-                        nextRepeatPair == null -> {
-                            next          = nextNormal
-                            nextTimestamp = nextNormal.timestamp
-                        }
-                        else -> {
-                            if (nextNormal.timestamp <= nextRepeatPair.second) {
-                                next          = nextNormal
-                                nextTimestamp = nextNormal.timestamp
-                            } else {
-                                next          = nextRepeatPair.first.copy(timestamp = nextRepeatPair.second)
-                                nextTimestamp = nextRepeatPair.second
-                            }
-                        }
-                    }
-
-                    _nextTask.value = next
-
-                    if (next != null) {
-                        startCountdown(nextTimestamp)
-                    } else {
-                        countdownJob?.cancel()
-                        _countdown.value = "✏️ 새로운 일정을 등록해주세요!"
                     }
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ 다음 할 일 조회 실패: ${e.message}", e)
+
+                Log.d("COUNTDOWN_DEBUG", "최종 선택된 next: ${next?.category?.displayName}")
+                Log.d("COUNTDOWN_DEBUG", "최종 nextTimestamp: $nextTimestamp")
+                Log.d("COUNTDOWN_DEBUG", "now와의 차이(ms): ${nextTimestamp - now}")
+
+                _nextTask.value = next
+
+                if (next != null) {
+                    startCountdown(next.timestamp)
+                } else {
+                    countdownJob?.cancel()
+                    _countdown.value = "새로운 일정을 등록해주세요!"
+                }
             }
         }
     }
@@ -325,15 +372,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun startCountdown(targetTimestamp: Long) {
         countdownJob?.cancel()
+
+        val exactTargetTime = Calendar.getInstance().apply {
+            timeInMillis = targetTimestamp
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
+        Log.d("COUNTDOWN_DEBUG", "=== startCountdown 시작 ===")
+        Log.d("COUNTDOWN_DEBUG", "targetTimestamp 입력값: $targetTimestamp")
+        Log.d("COUNTDOWN_DEBUG", "exactTargetTime(초 0처리): $exactTargetTime")
+        Log.d("COUNTDOWN_DEBUG", "현재 시각: ${System.currentTimeMillis()}")
+        Log.d("COUNTDOWN_DEBUG", "남은 시간(ms): ${exactTargetTime - System.currentTimeMillis()}")
+
         countdownJob = viewModelScope.launch {
             while (true) {
-                val diffMillis = targetTimestamp - System.currentTimeMillis()
+                val diffMillis = exactTargetTime - System.currentTimeMillis()
                 if (diffMillis <= 0) {
-                    _countdown.value = "지금!"
+                    Log.d("COUNTDOWN_DEBUG", "카운트다운 종료 -> loadNextTask 재호출")
                     loadNextTask()
                     break
                 }
-                _countdown.value = formatCountdown(diffMillis)
+                val formatted = formatCountdown(diffMillis)
+                Log.d("COUNTDOWN_DEBUG", "카운트다운 tick: $formatted (남은ms: $diffMillis)")
+                _countdown.value = formatted
                 delay(1000L)
             }
         }

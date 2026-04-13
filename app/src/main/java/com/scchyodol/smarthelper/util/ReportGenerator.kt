@@ -70,7 +70,7 @@ class ReportGenerator {
             val endOfMonth   = endCal.timeInMillis
 
             // 2) 반복 레코드 → 이번달 실제 발생일로 확장
-            val expandedRecords = expandRecordsForMonth(records, startOfMonth, endOfMonth)
+            val expandedRecords = records
 
             Log.d(TAG, "원본 레코드: ${records.size}건, 확장 후: ${expandedRecords.size}건")
 
@@ -81,7 +81,8 @@ class ReportGenerator {
 
             // 3) 파일명
             val monthLabel = String.format("%d년 %02d월", year, month + 1)
-            val fileName   = "셀프케어_리포트_${year}${String.format("%02d", month + 1)}.pdf"
+            val currentTime = SimpleDateFormat("HHmmss", Locale.KOREA).format(System.currentTimeMillis())
+            val fileName = "셀프케어_리포트_${year}${String.format("%02d", month + 1)}_${currentTime}.pdf"
 
             // 4) 저장
             val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -102,77 +103,52 @@ class ReportGenerator {
         }
     }
 
-    // ── 반복 레코드 확장 핵심 로직 ────────────────────────────────
-    /**
-     * isRepeat=true 레코드를 해당 월의 실제 발생일(가상 CareRecord)로 펼쳐줌
-     * isRepeat=false 레코드는 startOfMonth ~ endOfMonth 범위 것만 그대로 포함
-     */
-    private fun expandRecordsForMonth(
-        records      : List<CareRecord>,
-        startOfMonth : Long,
-        endOfMonth   : Long
-    ): List<CareRecord> {
+    fun generateWeeklyPDF(
+        context     : Context,
+        records     : List<CareRecord>,   // DB에서 가져온 원본 (반복 포함)
+        startOfWeek : Long,
+        endOfWeek   : Long
+    ): File? {
+        return try {
+            // 1) 반복 레코드 → 이번주 실제 발생일로 확장
+            val expandedRecords = records
 
-        val result  = mutableListOf<CareRecord>()
-        val iterCal = Calendar.getInstance()
-        val timeCal = Calendar.getInstance()
+            Log.d(TAG, "원본 레코드: ${records.size}건, 확장 후: ${expandedRecords.size}건")
 
-        records.forEach { record ->
-            if (!record.isRepeat) {
-                // 일반 레코드: 이번달 범위 것만 포함
-                if (record.timestamp in startOfMonth..endOfMonth) {
-                    result.add(record)
-                }
-            } else {
-                // 반복 레코드: 이번달 해당 요일들을 가상 레코드로 생성
-                if (record.repeatDays.isBlank()) return@forEach
-
-                val repeatDayInts = record.repeatDays.split(",")
-                    .mapNotNull { it.trim().toIntOrNull() }
-
-                val targetCalDays = repeatDayInts
-                    .mapNotNull { DAY_OF_WEEK_MAP[it] }
-                    .toSet()
-
-                if (targetCalDays.isEmpty()) return@forEach
-
-                // 기준 시각 (시:분)
-                timeCal.timeInMillis = record.timestamp
-                val baseHour   = timeCal.get(Calendar.HOUR_OF_DAY)
-                val baseMinute = timeCal.get(Calendar.MINUTE)
-
-                // 이번달 1일부터 말일까지 순회
-                iterCal.timeInMillis = startOfMonth
-
-                while (iterCal.timeInMillis <= endOfMonth) {
-                    if (iterCal.get(Calendar.DAY_OF_WEEK) in targetCalDays) {
-                        // 해당 날 + 기준 시각으로 타임스탬프 생성
-                        val occurrenceCal = Calendar.getInstance().apply {
-                            timeInMillis = iterCal.timeInMillis
-                            set(Calendar.HOUR_OF_DAY, baseHour)
-                            set(Calendar.MINUTE,      baseMinute)
-                            set(Calendar.SECOND,      0)
-                            set(Calendar.MILLISECOND, 0)
-                        }
-                        val occurrenceTs = occurrenceCal.timeInMillis
-
-                        // 반복 시작일(record.timestamp) 이후인 것만 포함
-                        if (occurrenceTs >= record.timestamp) {
-                            result.add(
-                                record.copy(
-                                    timestamp = occurrenceTs,
-                                    isRepeat  = false   // 확장된 가상 레코드는 단건 취급
-                                )
-                            )
-                        }
-                    }
-                    iterCal.add(Calendar.DAY_OF_MONTH, 1)
-                }
+            if (expandedRecords.isEmpty()) {
+                Log.w(TAG, "이번주 표시할 데이터 없음")
+                return null
             }
-        }
 
-        // 날짜 오름차순 정렬
-        return result.sortedBy { it.timestamp }
+            // 2) 파일명 생성
+            val startCal = Calendar.getInstance().apply { timeInMillis = startOfWeek }
+            val endCal = Calendar.getInstance().apply { timeInMillis = endOfWeek - 1 }
+
+            val startDate = SimpleDateFormat("MM.dd", Locale.KOREA). format(startOfWeek)
+            val endDate = SimpleDateFormat("MM.dd", Locale.KOREA).format(endOfWeek - 1)
+            val yearLabel = startCal.get(Calendar.YEAR)
+
+            val weekLabel = "${yearLabel}년 ${startDate}~${endDate}"
+            val currentTime = SimpleDateFormat("HHmmss", Locale.KOREA).format(System.currentTimeMillis())
+            val fileName = "셀프케어_주간_리포트_${SimpleDateFormat("MMdd", Locale.KOREA).format(startOfWeek)}_${currentTime}.pdf"
+
+            // 3) 저장
+            val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                saveToDownloadsWithMediaStore(
+                    context, fileName, expandedRecords, startOfWeek, endOfWeek, weekLabel
+                )
+            } else {
+                saveToDownloadsLegacy(
+                    context, fileName, expandedRecords, startOfWeek, endOfWeek, weekLabel
+                )
+            }
+
+            Log.d(TAG, "주간 PDF 생성 완료: ${file?.absolutePath}")
+            file
+        } catch (e: Exception) {
+            Log.e(TAG, "주간 PDF 생성 실패", e)
+            null
+        }
     }
 
     // ── Android 10+ ──────────────────────────────────────────────

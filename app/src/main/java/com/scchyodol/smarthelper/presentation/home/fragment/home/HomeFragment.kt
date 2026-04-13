@@ -44,6 +44,7 @@ class HomeFragment : Fragment() {
     // 현재 표시 중인 nextTask를 저장해두기 위한 변수
     private var currentNextTask: CareRecord? = null
     private var currentDialog: Dialog? = null
+    private var lastWeatherFetchTime = 0L
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,6 +56,17 @@ class HomeFragment : Fragment() {
         observeDeleteState()
         return view
     }
+
+    override fun onResume() {
+        super.onResume()
+        val now = System.currentTimeMillis()
+        // 5분 지났을 때만 재요청
+        if (now - lastWeatherFetchTime > 10 * 60 * 1000L) {
+            lastWeatherFetchTime = now
+            viewModel.refreshWeatherManually()
+        }
+    }
+
 
     // ─── 날씨 ──────────────────────────────────────────────────────────────
     private fun observeWeather(view: View) {
@@ -81,6 +93,41 @@ class HomeFragment : Fragment() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private fun getSmartCountdownFormat(targetTimestamp: Long): String {
+        val now = System.currentTimeMillis()
+        val diff = targetTimestamp - now
+
+        return when {
+            diff <= 0 -> "지금 할 시간입니다!"
+
+            diff < 60 * 1000 -> {
+                val seconds = (diff / 1000).toInt()
+                "${seconds}초 남음"
+            }
+
+            diff < 60 * 60 * 1000 -> {
+                val minutes = (diff / (60 * 1000)).toInt()
+                val seconds = ((diff % (60 * 1000)) / 1000).toInt()
+                "${minutes}분 ${seconds}초 남음"
+            }
+
+            diff < 24 * 60 * 60 * 1000 -> {
+                val hours = (diff / (60 * 60 * 1000)).toInt()
+                val minutes = ((diff % (60 * 60 * 1000)) / (60 * 1000)).toInt()
+                val seconds = ((diff % (60 * 1000)) / 1000).toInt()
+                "${hours}시간 ${minutes}분 ${seconds}초 남음"
+            }
+
+            else -> {
+                val days = (diff / (24 * 60 * 60 * 1000)).toInt()
+                val hours = ((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000)).toInt()
+                val minutes = ((diff % (60 * 60 * 1000)) / (60 * 1000)).toInt()
+                val seconds = ((diff % (60 * 1000)) / 1000).toInt()
+                "${days}일 후 ${hours}시간 ${minutes}분 ${seconds}초"
             }
         }
     }
@@ -130,7 +177,11 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.countdown.collect { text ->
-                    tvCountdown.text = text
+                    tvCountdown.text = if (currentNextTask != null) {
+                        getSmartCountdownFormat(currentNextTask!!.timestamp)
+                    } else {
+                        text  // 일정 없으면 기본 메시지
+                    }
                 }
             }
         }

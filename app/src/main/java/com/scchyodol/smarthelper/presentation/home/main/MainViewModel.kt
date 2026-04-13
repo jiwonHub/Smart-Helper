@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.scchyodol.smarthelper.alarm.AlarmScheduler
 import com.scchyodol.smarthelper.data.db.AppDatabase
+import com.scchyodol.smarthelper.data.model.CareCategory
 import com.scchyodol.smarthelper.data.model.CareRecord
 import com.scchyodol.smarthelper.data.model.Mood
 import com.scchyodol.smarthelper.data.model.ScheduleItem
@@ -389,12 +390,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             while (true) {
                 val diffMillis = exactTargetTime - System.currentTimeMillis()
                 if (diffMillis <= 0) {
-                    Log.d("COUNTDOWN_DEBUG", "카운트다운 종료 -> loadNextTask 재호출")
                     loadNextTask()
                     break
                 }
                 val formatted = formatCountdown(diffMillis)
-                Log.d("COUNTDOWN_DEBUG", "카운트다운 tick: $formatted (남은ms: $diffMillis)")
                 _countdown.value = formatted
                 delay(1000L)
             }
@@ -668,38 +667,245 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _exportState.value = ExportState.Loading
             try {
-                // 현재 캘린더에 표시 중인 연도/월 기준
-                val year  = _calendarYear.value
+                val year = _calendarYear.value
                 val month = _calendarMonth.value
 
-                // DB에서 전체 레코드 조회 (반복 포함)
-                // → ReportGenerator 내부에서 이번달 데이터만 필터 + 반복 확장
+                val startCal = Calendar.getInstance().apply {
+                    set(year, month, 1, 0, 0, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+                val endCal = Calendar.getInstance().apply {
+                    set(year, month, 1, 0, 0, 0)
+                    set(Calendar.MILLISECOND, 0)
+                    add(Calendar.MONTH, 1)
+                }
+                val startOfMonth = startCal.timeInMillis
+                val endOfMonth = endCal.timeInMillis
+
                 val allRecords = careRecordRepository.getAllOnce()
+                val expandedRecords = mutableListOf<CareRecord>()
 
-                Log.d(TAG, "PDF 출력 대상 - ${year}년 ${month + 1}월, 전체 레코드: ${allRecords.size}건")
+                Log.d(TAG, "=== 월간 PDF 데이터 확인 ===")
+                Log.d(TAG, "전체 레코드 수: ${allRecords.size}")
+                allRecords.forEachIndexed { i, record ->
+                    val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA)
+                    Log.d(TAG, "[$i] id=${record.id} | category=${record.category} | " +
+                            "isRepeat=${record.isRepeat} | repeatDays='${record.repeatDays}' | " +
+                            "timestamp=${fmt.format(record.timestamp)}"
+                    )
+                }
 
-                if (allRecords.isEmpty()) {
-                    _exportState.value = ExportState.Error("저장된 기록이 없습니다.")
+                val repeatOnly = allRecords.filter { it.isRepeat }
+                Log.d(TAG, "--- 반복 레코드만 ${repeatOnly.size}건 ---")
+                repeatOnly.forEachIndexed { i, record ->
+                    val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA)
+                    Log.d(TAG, "반복[$i] id=${record.id} | category=${record.category} | " +
+                            "repeatDays='${record.repeatDays}' | timestamp=${fmt.format(record.timestamp)}"
+                    )
+                }
+                Log.d(TAG, "===========================")
+
+                val dayOfWeekMap = mapOf(
+                    0 to Calendar.MONDAY, 1 to Calendar.TUESDAY,
+                    2 to Calendar.WEDNESDAY, 3 to Calendar.THURSDAY,
+                    4 to Calendar.FRIDAY, 5 to Calendar.SATURDAY,
+                    6 to Calendar.SUNDAY
+                )
+
+                // 일반 기록 추가
+                allRecords
+                    .filter { !it.isRepeat && it.timestamp >= startOfMonth && it.timestamp < endOfMonth }
+                    .forEach { expandedRecords.add(it) }
+
+                // ✅ 핵심 수정: 반복 기록 중복 제거 후 확장
+                // 동일한 (category + repeatDays + hour + minute) 조합은 가장 오래된(첫 번째) 레코드 하나만 사용
+                val uniqueRepeatRecords = allRecords
+                    .filter { it.isRepeat && it.repeatDays.isNotBlank() }
+                    .groupBy { record ->
+                        val baseCal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+                        val hour = baseCal.get(Calendar.HOUR_OF_DAY)
+                        val minute = baseCal.get(Calendar.MINUTE)
+                        "${record.category}_${record.repeatDays}_${hour}_${minute}"
+                    }
+                    .map { (_, records) -> records.minByOrNull { it.timestamp }!! } // 가장 오래된 것 하나만
+
+                uniqueRepeatRecords.forEach { record ->
+                    val repeatDayInts = record.repeatDays.split(",").mapNotNull { it.trim().toIntOrNull() }
+                    val targetCalendarDays = repeatDayInts.mapNotNull { dayOfWeekMap[it] }.toSet()
+
+                    val baseCal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+                    val baseHour = baseCal.get(Calendar.HOUR_OF_DAY)
+                    val baseMinute = baseCal.get(Calendar.MINUTE)
+
+                    val iterCal = Calendar.getInstance().apply { timeInMillis = startOfMonth }
+
+                    while (iterCal.timeInMillis < endOfMonth) {
+                        if (iterCal.get(Calendar.DAY_OF_WEEK) in targetCalendarDays) {
+                            val targetCal = Calendar.getInstance().apply {
+                                timeInMillis = iterCal.timeInMillis
+                                set(Calendar.HOUR_OF_DAY, baseHour)
+                                set(Calendar.MINUTE, baseMinute)
+                                set(Calendar.SECOND, 0)
+                                set(Calendar.MILLISECOND, 0)
+                            }
+                            val targetTimestamp = targetCal.timeInMillis
+
+                            if (targetTimestamp >= record.timestamp) {
+                                expandedRecords.add(record.copy(timestamp = targetTimestamp))
+                            }
+                        }
+                        iterCal.add(Calendar.DAY_OF_MONTH, 1)
+                    }
+                }
+
+                expandedRecords.sortBy { it.timestamp }
+
+                Log.d(TAG, "=== 확장된 레코드 상세 ===")
+                expandedRecords.forEachIndexed { i, record ->
+                    val fmt = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.KOREA)
+                    val cal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+                    val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+                    Log.d(TAG, "확장[$i] ${dayOfMonth}일 ${fmt.format(record.timestamp)} | " +
+                            "category=${record.category} | isRepeat=${record.isRepeat}"
+                    )
+                }
+                Log.d(TAG, "=======================")
+
+                Log.d(TAG, "월간 PDF - uniqueRepeat=${uniqueRepeatRecords.size}건, 확장=${expandedRecords.size}건")
+
+                if (expandedRecords.isEmpty()) {
+                    _exportState.value = ExportState.Error("이번달 기록이 없습니다.")
                     return@launch
                 }
 
                 val file = withContext(Dispatchers.IO) {
                     reportGenerator.generateMonthlyPDF(
                         context = getApplication(),
-                        records = allRecords,
-                        year    = year,
-                        month   = month
+                        records = expandedRecords,
+                        year = year,
+                        month = month
+                    )
+                }
+
+                _exportState.value = if (file != null) ExportState.Success(file)
+                else ExportState.Error("PDF 생성 실패")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "PDF 내보내기 실패: ${e.message}", e)
+                _exportState.value = ExportState.Error(e.message ?: "알 수 없는 오류")
+            }
+        }
+    }
+
+    // ─── 이번주 PDF 내보내기 ──────────────────────────────────────────
+    fun exportCurrentWeekToPdf() {
+        viewModelScope.launch {
+            _exportState.value = ExportState.Loading
+            try {
+                val startCal = Calendar.getInstance().apply {
+                    val dayOfWeek = get(Calendar.DAY_OF_WEEK)
+                    val offset = when (dayOfWeek) {
+                        Calendar.SUNDAY -> -6; Calendar.MONDAY -> 0
+                        Calendar.TUESDAY -> -1; Calendar.WEDNESDAY -> -2
+                        Calendar.THURSDAY -> -3; Calendar.FRIDAY -> -4
+                        Calendar.SATURDAY -> -5; else -> 0
+                    }
+                    add(Calendar.DAY_OF_MONTH, offset)
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                val endCal = Calendar.getInstance().apply {
+                    timeInMillis = startCal.timeInMillis
+                    add(Calendar.DAY_OF_MONTH, 7)
+                }
+
+                val startOfWeek = startCal.timeInMillis
+                val endOfWeek = endCal.timeInMillis
+
+                val allRecords = careRecordRepository.getAllOnce()
+
+                // ⭐ 주간 전용 직접 확장 로직
+                val expandedRecords = mutableListOf<CareRecord>()
+
+                val dayOfWeekMap = mapOf(
+                    0 to Calendar.MONDAY, 1 to Calendar.TUESDAY,
+                    2 to Calendar.WEDNESDAY, 3 to Calendar.THURSDAY,
+                    4 to Calendar.FRIDAY, 5 to Calendar.SATURDAY,
+                    6 to Calendar.SUNDAY
+                )
+
+                // 일반 기록 추가
+                val uniqueRepeatRecords = allRecords
+                    .filter { it.isRepeat && it.repeatDays.isNotBlank() }
+                    .groupBy { record ->
+                        val baseCal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+                        val hour = baseCal.get(Calendar.HOUR_OF_DAY)
+                        val minute = baseCal.get(Calendar.MINUTE)
+                        "${record.category}_${record.repeatDays}_${hour}_${minute}"
+                    }
+                    .map { (_, records) -> records.minByOrNull { it.timestamp }!! }
+
+                // 반복 기록 확장
+                uniqueRepeatRecords.filter { it.isRepeat && it.repeatDays.isNotBlank() }
+                    .forEach { record ->
+                        val repeatDayInts = record.repeatDays.split(",").mapNotNull { it.trim().toIntOrNull() }
+                        val targetCalendarDays = repeatDayInts.mapNotNull { dayOfWeekMap[it] }.toSet()
+
+                        val baseCal = Calendar.getInstance().apply { timeInMillis = record.timestamp }
+                        val baseHour = baseCal.get(Calendar.HOUR_OF_DAY)
+                        val baseMinute = baseCal.get(Calendar.MINUTE)
+
+                        val iterCal = Calendar.getInstance().apply { timeInMillis = startOfWeek }
+
+                        while (iterCal.timeInMillis < endOfWeek) {
+                            if (iterCal.get(Calendar.DAY_OF_WEEK) in targetCalendarDays) {
+                                val targetCal = Calendar.getInstance().apply {
+                                    timeInMillis = iterCal.timeInMillis
+                                    set(Calendar.HOUR_OF_DAY, baseHour)
+                                    set(Calendar.MINUTE, baseMinute)
+                                    set(Calendar.SECOND, 0)
+                                    set(Calendar.MILLISECOND, 0)
+                                }
+                                val targetTimestamp = targetCal.timeInMillis
+
+                                if (targetTimestamp >= record.timestamp) {
+                                    expandedRecords.add(record.copy(timestamp = targetTimestamp))
+                                }
+                            }
+                            iterCal.add(Calendar.DAY_OF_MONTH, 1)
+                        }
+                    }
+
+                // 시간순 정렬
+                expandedRecords.sortBy { it.timestamp }
+
+                Log.d(TAG, "주간 PDF 출력 - 확장된 레코드: ${expandedRecords.size}건")
+
+                if (expandedRecords.isEmpty()) {
+                    _exportState.value = ExportState.Error("이번주 기록이 없습니다.")
+                    return@launch
+                }
+
+                val file = withContext(Dispatchers.IO) {
+                    reportGenerator.generateWeeklyPDF(
+                        context = getApplication(),
+                        records = expandedRecords,
+                        startOfWeek = startOfWeek,
+                        endOfWeek = endOfWeek
                     )
                 }
 
                 if (file != null) {
                     _exportState.value = ExportState.Success(file)
                 } else {
-                    _exportState.value = ExportState.Error("이번달 기록이 없습니다.")
+                    _exportState.value = ExportState.Error("PDF 생성 실패")
                 }
 
             } catch (e: Exception) {
-                Log.e(TAG, "PDF 내보내기 실패: ${e.message}", e)
+                Log.e(TAG, "주간 PDF 내보내기 실패: ${e.message}", e)
                 _exportState.value = ExportState.Error(e.message ?: "알 수 없는 오류")
             }
         }

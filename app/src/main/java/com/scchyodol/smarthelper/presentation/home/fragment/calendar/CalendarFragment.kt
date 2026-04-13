@@ -70,6 +70,16 @@ class CalendarFragment : Fragment() {
         loadCurrentMonth()
     }
 
+    override fun onResume() {
+        super.onResume()
+
+        // 현재 표시 중인 년/월 다시 로드
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        viewModel.loadCalendarMonth(year, month)
+    }
+
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -97,7 +107,7 @@ class CalendarFragment : Fragment() {
                             is ExportState.Loading -> showLoadingDialog()
                             is ExportState.Success -> {
                                 hideLoadingDialog()
-                                showOpenPdfDialog(state.file)
+                                sharePdfFile(state.file)   // 여기서 바로 공유 Intent
                                 viewModel.resetExportState()
                             }
                             is ExportState.Error -> {
@@ -109,7 +119,6 @@ class CalendarFragment : Fragment() {
                         }
                     }
                 }
-
                 launch {
                     viewModel.deleteState.collect { state ->
                         when (state) {
@@ -283,36 +292,51 @@ class CalendarFragment : Fragment() {
         }
     }
 
-    // ── 내보내기 다이얼로그 ───────────────────────────────────────
     private fun showExportDialog() {
-        val dialogView = LayoutInflater.from(requireContext())
-            .inflate(R.layout.dialog_data_export, null)
+        showPeriodSelectionDialog()
+    }
+
+    private fun showPeriodSelectionDialog() {
+        val view = LayoutInflater.from(requireContext())
+            .inflate(R.layout.dialog_export_step1, null)
 
         val dialog = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
+            .setView(view)
             .create()
-
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
-        dialogView.findViewById<View>(R.id.btnExportPdf).setOnClickListener {
+        view.findViewById<Button>(R.id.btnMonthly).setOnClickListener {
             dialog.dismiss()
-            viewModel.exportCurrentMonthToPdf()
+            viewModel.exportCurrentMonthToPdf()  // 바로 PDF 생성
         }
-
-        dialogView.findViewById<View>(R.id.btnExportCsv).setOnClickListener {
-            Toast.makeText(requireContext(), "준비 중인 기능입니다.", Toast.LENGTH_SHORT).show()
+        view.findViewById<Button>(R.id.btnWeekly).setOnClickListener {
+            dialog.dismiss()
+            viewModel.exportCurrentWeekToPdf()   // 바로 PDF 생성
         }
-
-        dialogView.findViewById<View>(R.id.btnExportShare).setOnClickListener {
-            Toast.makeText(requireContext(), "준비 중인 기능입니다.", Toast.LENGTH_SHORT).show()
-        }
-
-        dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener {
+        view.findViewById<Button>(R.id.btnCancel).setOnClickListener {
             dialog.dismiss()
         }
 
         dialog.show()
     }
+
+    private fun sharePdfFile(file: File) {
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            file
+        )
+
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(Intent.EXTRA_SUBJECT, "케어 리포트")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        startActivity(Intent.createChooser(intent, "공유하기"))
+    }
+
 
     private fun showDateDetailDialog(day: Int, schedules: List<ScheduleItem>) {
         val dialogView = LayoutInflater.from(requireContext())
@@ -322,7 +346,6 @@ class CalendarFragment : Fragment() {
             .setView(dialogView)
             .create()
 
-        // ← 이 부분이 누락되었었음!
         currentDetailDialog = dialog
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
